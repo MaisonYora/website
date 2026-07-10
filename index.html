@@ -972,74 +972,8 @@
         <div><strong>Signature &amp; everyday candles</strong> — in stock, delivered in 3–7 business days.</div>
       </div>
 
-      <div class="products">
-
-        <div class="product-card">
-          <div class="product-img"><img data-img="product-rose-bloom" alt="Rose Bloom structural candle"></div>
-          <div class="product-body">
-            <h3>Rose Bloom Candle</h3>
-            <p class="desc">Sculpted soy wax rose in blush ivory, scented with garden rose and white musk.</p>
-            <div class="product-meta"><span class="price">$68 CAD</span><span class="badge gold">Custom</span></div>
-            <span class="delivery-note">Made to order — up to 7 days</span>
-            <button type="button" class="add-btn" data-name="Rose Bloom Candle" data-price="68">Add to Order</button>
-          </div>
-        </div>
-
-        <div class="product-card">
-          <div class="product-img"><img data-img="product-peony-cascade" alt="Peony Cascade structural candle"></div>
-          <div class="product-body">
-            <h3>Peony Cascade</h3>
-            <p class="desc">Layered peony petals in soft champagne wax with a fresh peony and pear scent.</p>
-            <div class="product-meta"><span class="price">$72 CAD</span><span class="badge gold">Custom</span></div>
-            <span class="delivery-note">Made to order — up to 7 days</span>
-            <button type="button" class="add-btn" data-name="Peony Cascade" data-price="72">Add to Order</button>
-          </div>
-        </div>
-
-        <div class="product-card">
-          <div class="product-img"><img data-img="product-orchid-trio" alt="Ivory Orchid Trio structural candle set"></div>
-          <div class="product-body">
-            <h3>Ivory Orchid Trio</h3>
-            <p class="desc">Three sculpted orchid blooms on a single base, in a quiet jasmine and sandalwood scent.</p>
-            <div class="product-meta"><span class="price">$85 CAD</span><span class="badge gold">Custom</span></div>
-            <span class="delivery-note">Made to order — up to 7 days</span>
-            <button type="button" class="add-btn" data-name="Ivory Orchid Trio" data-price="85">Add to Order</button>
-          </div>
-        </div>
-
-        <div class="product-card">
-          <div class="product-img"><img data-img="product-ivory-pillar" alt="Classic Ivory Pillar candle"></div>
-          <div class="product-body">
-            <h3>Classic Ivory Pillar</h3>
-            <p class="desc">Our everyday soy pillar, unscented and clean-burning, finished in matte ivory.</p>
-            <div class="product-meta"><span class="price">$28 CAD</span><span class="badge">In Stock</span></div>
-            <span class="delivery-note">3–7 business days</span>
-            <button type="button" class="add-btn" data-name="Classic Ivory Pillar" data-price="28">Add to Order</button>
-          </div>
-        </div>
-
-        <div class="product-card">
-          <div class="product-img"><img data-img="product-amber-sandalwood" alt="Amber and Sandalwood jar candle"></div>
-          <div class="product-body">
-            <h3>Amber &amp; Sandalwood Jar</h3>
-            <p class="desc">A warm, woody signature scent in a reusable ivory glass jar.</p>
-            <div class="product-meta"><span class="price">$34 CAD</span><span class="badge">In Stock</span></div>
-            <span class="delivery-note">3–7 business days</span>
-            <button type="button" class="add-btn" data-name="Amber &amp; Sandalwood Jar" data-price="34">Add to Order</button>
-          </div>
-        </div>
-
-        <div class="product-card">
-          <div class="product-img"><img data-img="product-vanilla-votive" alt="Vanilla Bean Votive Set"></div>
-          <div class="product-body">
-            <h3>Vanilla Bean Votive Set</h3>
-            <p class="desc">A set of three soy votives in warm vanilla bean, for everyday quiet luxury.</p>
-            <div class="product-meta"><span class="price">$24 CAD</span><span class="badge">In Stock</span></div>
-            <span class="delivery-note">3–7 business days</span>
-            <button type="button" class="add-btn" data-name="Vanilla Bean Votive Set" data-price="24">Add to Order</button>
-          </div>
-        </div>
-
+      <div class="products" id="productsGrid">
+        <p style="grid-column:1/-1; font-size:14px; color:var(--charcoal-soft);">Loading candles…</p>
       </div>
     </div>
   </section>
@@ -1517,85 +1451,136 @@
     });
   }
 
-  function loadStockLevels(){
-    fetch('stock.csv?t=' + Date.now(), {cache: 'no-store'})
+  // Paste your Google Apps Script Web App URL here once you've set it up (see setup guide).
+  // Leave it as an empty string to keep using the local products.csv file in the repo instead.
+  var PRODUCTS_API_URL = 'https://script.google.com/macros/s/AKfycbwz8rFUDt6efmmXuHqtVLvC0r76wLMmEmAOspFiU97OLPipIgq7y9FckiUicOD5N1dp/exec';
+
+  function loadProducts(){
+    if (PRODUCTS_API_URL){
+      var sep = PRODUCTS_API_URL.indexOf('?') > -1 ? '&' : '?';
+      return fetch(PRODUCTS_API_URL + sep + 't=' + Date.now())
+        .then(function(res){
+          if (!res.ok) throw new Error('Google Sheet API not reachable');
+          return res.json();
+        })
+        .then(function(rows){
+          var products = rows.map(function(row){
+            return {
+              name: String(row.name || '').trim(),
+              description: String(row.description || '').trim(),
+              price: parseFloat(row.price),
+              type: String(row.type || '').trim().toLowerCase(),
+              image: String(row.image || '').trim(),
+              quantity: parseInt(row.quantity, 10)
+            };
+          }).filter(function(p){ return p.name; });
+          renderProducts(products);
+        })
+        .catch(function(err){
+          console.log('Could not load products from Google Sheet, falling back to local file:', err.message);
+          return loadProductsFromLocalCsv();
+        });
+    }
+    return loadProductsFromLocalCsv();
+  }
+
+  function loadProductsFromLocalCsv(){
+    return fetch('products.csv?t=' + Date.now(), {cache: 'no-store'})
       .then(function(res){
-        if (!res.ok) throw new Error('stock.csv not found');
+        if (!res.ok) throw new Error('products.csv not found');
         return res.text();
       })
       .then(function(text){
         var lines = text.trim().split(/\r?\n/);
-        var stock = {};
+        var products = [];
         for (var i=1; i<lines.length; i++){ // skip header row
           var line = lines[i];
           if (!line) continue;
-          var lastComma = line.lastIndexOf(',');
-          if (lastComma === -1) continue;
-          var name = line.slice(0, lastComma).trim();
-          var qty = parseInt(line.slice(lastComma + 1).trim(), 10);
-          if (isNaN(qty)) continue;
-          stock[name] = qty;
+          var parts = line.split(',');
+          if (parts.length < 6) continue;
+          products.push({
+            name: parts[0].trim(),
+            description: parts[1].trim(),
+            price: parseFloat(parts[2]),
+            type: parts[3].trim().toLowerCase(),
+            image: parts[4].trim(),
+            quantity: parseInt(parts[5].trim(), 10)
+          });
         }
-        applyStockLevels(stock);
+        renderProducts(products);
       })
       .catch(function(err){
-        // stock.csv missing or unreadable (e.g. opening the file directly instead of via a web server) —
-        // the site just falls back to showing every product as available.
-        console.log('Stock levels not loaded:', err.message);
+        var grid = document.getElementById('productsGrid');
+        if (grid) grid.innerHTML = '<p style="grid-column:1/-1; font-size:14px; color:var(--charcoal-soft);">Candles could not be loaded right now. Please refresh the page.</p>';
+        console.log('Could not load products.csv:', err.message);
       });
   }
 
-  function applyStockLevels(stock){
-    document.querySelectorAll('.add-btn[data-name]').forEach(function(btn){
-      var name = btn.getAttribute('data-name');
-      if (!(name in stock)) return;
-      var qty = stock[name];
-      var card = btn.closest('.product-card');
-      var badge = card ? card.querySelector('.badge') : null;
-      var deliveryNote = card ? card.querySelector('.delivery-note') : null;
-      var existingNote = card ? card.querySelector('.stock-note') : null;
+  function escapeHtml(str){
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
 
-      if (qty <= 0){
-        if (card) card.classList.add('sold-out');
-        if (badge){ badge.textContent = 'Sold Out'; badge.classList.add('sold-out'); }
-        btn.disabled = true;
-        btn.textContent = 'Sold Out';
-        if (existingNote) existingNote.remove();
-      } else if (qty <= 5){
-        if (existingNote){
-          existingNote.textContent = 'Only ' + qty + ' left in stock';
-          existingNote.classList.add('show');
-        } else if (deliveryNote){
-          var note = document.createElement('span');
-          note.className = 'stock-note show';
-          note.textContent = 'Only ' + qty + ' left in stock';
-          deliveryNote.insertAdjacentElement('afterend', note);
-        }
-      } else if (existingNote){
-        existingNote.remove();
-      }
+  function renderProducts(products){
+    var grid = document.getElementById('productsGrid');
+    if (!grid) return;
+    if (products.length === 0){
+      grid.innerHTML = '<p style="grid-column:1/-1; font-size:14px; color:var(--charcoal-soft);">No candles to show yet.</p>';
+      return;
+    }
+    var html = '';
+    products.forEach(function(p){
+      var isCustom = p.type === 'custom';
+      var qty = isNaN(p.quantity) ? null : p.quantity;
+      var soldOut = qty !== null && qty <= 0;
+      var lowStock = qty !== null && qty > 0 && qty <= 5;
+
+      var badgeClass = isCustom ? 'badge gold' : 'badge';
+      var badgeText = isCustom ? 'Custom' : 'In Stock';
+      if (soldOut){ badgeClass += ' sold-out'; badgeText = 'Sold Out'; }
+
+      var deliveryText = isCustom ? 'Made to order — up to 7 days' : '3–7 business days';
+      var safeName = escapeHtml(p.name);
+
+      var stockNoteHtml = lowStock ? '<span class="stock-note show">Only ' + qty + ' left in stock</span>' : '';
+      var btnDisabled = soldOut ? ' disabled' : '';
+      var btnLabel = soldOut ? 'Sold Out' : 'Add to Order';
+
+      html += '<div class="product-card' + (soldOut ? ' sold-out' : '') + '">' +
+        '<div class="product-img"><img data-img="' + escapeHtml(p.image) + '" alt="' + safeName + '"></div>' +
+        '<div class="product-body">' +
+          '<h3>' + safeName + '</h3>' +
+          '<p class="desc">' + escapeHtml(p.description) + '</p>' +
+          '<div class="product-meta"><span class="price">$' + p.price.toFixed(0) + ' CAD</span><span class="' + badgeClass + '">' + badgeText + '</span></div>' +
+          '<span class="delivery-note">' + deliveryText + '</span>' +
+          stockNoteHtml +
+          '<button type="button" class="add-btn" data-name="' + safeName + '" data-price="' + p.price + '"' + btnDisabled + '>' + btnLabel + '</button>' +
+        '</div>' +
+      '</div>';
     });
+    grid.innerHTML = html;
   }
 
   document.addEventListener('DOMContentLoaded', function(){
 
-    // Add to Order buttons
-    document.querySelectorAll('.add-btn').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var name = btn.getAttribute('data-name');
-        var price = parseFloat(btn.getAttribute('data-price'));
-        addToCart(name, price);
-        var originalText = btn.textContent;
-        btn.textContent = 'Added ✓';
-        btn.classList.add('added');
-        var cartBtn = document.getElementById('cartToggle');
-        cartBtn.style.transform = 'scale(1.12)';
-        setTimeout(function(){ cartBtn.style.transform = ''; }, 220);
-        setTimeout(function(){
-          btn.textContent = originalText;
-          btn.classList.remove('added');
-        }, 1300);
-      });
+    // Add to Order buttons (event delegation, since cards are rendered dynamically from products.csv)
+    document.getElementById('productsGrid').addEventListener('click', function(e){
+      var btn = e.target.closest('.add-btn');
+      if (!btn || btn.disabled) return;
+      var name = btn.getAttribute('data-name');
+      var price = parseFloat(btn.getAttribute('data-price'));
+      addToCart(name, price);
+      var originalText = btn.textContent;
+      btn.textContent = 'Added ✓';
+      btn.classList.add('added');
+      var cartBtn = document.getElementById('cartToggle');
+      cartBtn.style.transform = 'scale(1.12)';
+      setTimeout(function(){ cartBtn.style.transform = ''; }, 220);
+      setTimeout(function(){
+        btn.textContent = originalText;
+        btn.classList.remove('added');
+      }, 1300);
     });
 
     // Cart panel open/close
@@ -1657,8 +1642,10 @@
     });
 
     renderAll();
-    loadStockLevels();
-    refreshImages();
+    loadProducts().then(function(){
+      refreshImages();
+    });
+    refreshImages(); // covers hero/about/gallery images, which don't depend on products.csv
   });
 })();
 </script>
