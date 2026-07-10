@@ -53,8 +53,8 @@
   .wrap{max-width:var(--maxw); margin:0 auto; padding:0 32px; position:relative; z-index:1;}
 
   /* offset anchor scrolling so headings don't hide behind the sticky ribbon + header */
-  section[id], [id]{scroll-margin-top:255px;}
-  section{padding:110px 0;}
+  section[id], [id]{scroll-margin-top:175px;}
+  section{padding:64px 0;}
   .eyebrow{
     font-family:'Jost', sans-serif;
     text-transform:uppercase;
@@ -160,7 +160,7 @@
   .nav{
     max-width:var(--maxw);
     margin:0 auto;
-    padding:10px 32px;
+    padding:6px 32px;
     display:flex;
     align-items:center;
     justify-content:space-between;
@@ -177,7 +177,7 @@
     flex-shrink:0;
   }
   .brand .mark{
-    width:170px; height:170px;
+    width:92px; height:92px;
     display:flex; align-items:center; justify-content:center;
     flex-shrink:0;
   }
@@ -302,7 +302,7 @@
   }
 
   /* ---------- ABOUT ---------- */
-  .about{background:var(--ivory-deep); padding:70px 0;}
+  .about{background:var(--ivory-deep); padding:56px 0;}
   .about-grid{
     display:grid;
     grid-template-columns:0.8fr 1.1fr;
@@ -822,16 +822,16 @@
       transition:transform .35s ease;
       border-left:1px solid var(--line);
     }
-    #nav-toggle:checked ~ .nav nav.links{transform:translateX(0);}
+    #nav-toggle:checked ~ header .nav nav.links{transform:translateX(0);}
     .burger{display:flex;}
-    section{padding:70px 0;}
+    section{padding:48px 0;}
     .feature-grid, .products{grid-template-columns:1fr;}
     .form-row{grid-template-columns:1fr;}
     .reviews-grid{grid-template-columns:1fr;}
     .review-promo{flex-direction:column; align-items:flex-start;}
-    .brand .mark{width:100px; height:100px;}
+    .brand .mark{width:64px; height:64px;}
     .brand{font-size:21px; gap:10px;}
-    section[id], [id]{scroll-margin-top:175px;}
+    section[id], [id]{scroll-margin-top:135px;}
     #cartToggle{width:52px; height:52px; right:18px; bottom:18px;}
     #cartPanel{width:100vw; max-width:100vw;}
     .brand-wordmark{height:30px;}
@@ -956,6 +956,49 @@
           <h3>Hand-Delivered Care</h3>
           <p>Every custom piece is poured to order and delivered within 7 days, packaged for gifting.</p>
         </div>
+      </div>
+
+      <div class="form-card" style="max-width:640px; margin:56px auto 0; text-align:left;">
+        <h3 style="margin-bottom:22px;">Design Your Custom Candle</h3>
+        <div class="form-row">
+          <div class="field">
+            <label>Bloom</label>
+            <select id="customBloom">
+              <option value="Rose">Rose</option>
+              <option value="Peony">Peony</option>
+              <option value="Orchid">Orchid</option>
+              <option value="Ranunculus">Ranunculus</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Colour</label>
+            <select id="customColor">
+              <option value="Ivory White">Ivory White</option>
+              <option value="Blush Pink">Blush Pink</option>
+              <option value="Champagne Gold">Champagne Gold</option>
+              <option value="Sage Green">Sage Green</option>
+              <option value="Terracotta">Terracotta</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label>Scent</label>
+            <select id="customScent">
+              <option value="Garden Rose & White Musk">Garden Rose &amp; White Musk</option>
+              <option value="Peony & Pear">Peony &amp; Pear</option>
+              <option value="Jasmine & Sandalwood">Jasmine &amp; Sandalwood</option>
+              <option value="Amber & Woods">Amber &amp; Woods</option>
+              <option value="Unscented">Unscented</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Quantity</label>
+            <input type="number" id="customQty" value="1" min="1" max="10">
+          </div>
+        </div>
+        <p style="font-size:14px; color:var(--charcoal-soft); margin-bottom:18px;">Starting at <strong style="color:var(--gold-deep);">$75 CAD</strong> per candle. Final pricing is confirmed with you after we review your design — some bloom and finish combinations may adjust the price slightly.</p>
+        <button type="button" class="btn btn-primary" id="addCustomBtn" style="width:100%; border:none;">Add Custom Candle to Order</button>
       </div>
     </div>
   </section>
@@ -1455,14 +1498,46 @@
   // Leave it as an empty string to keep using the local products.csv file in the repo instead.
   var PRODUCTS_API_URL = 'https://script.google.com/macros/s/AKfycbwz8rFUDt6efmmXuHqtVLvC0r76wLMmEmAOspFiU97OLPipIgq7y9FckiUicOD5N1dp/exec';
 
+  // Loads data from the Apps Script Web App via JSONP (a <script> tag) instead of fetch().
+  // Google's Web App URL redirects internally in a way that strips the permission header
+  // fetch() requires (a CORS limitation on Google's end), so a normal fetch() call always
+  // fails here. Loading it as a script tag sidesteps that restriction entirely.
+  function loadProductsViaJsonp(){
+    return new Promise(function(resolve, reject){
+      var callbackName = 'maisonYoraProductsCallback_' + Date.now();
+      var timeoutId;
+
+      function cleanup(){
+        clearTimeout(timeoutId);
+        delete window[callbackName];
+        if (script.parentNode) script.parentNode.removeChild(script);
+      }
+
+      window[callbackName] = function(data){
+        cleanup();
+        resolve(data);
+      };
+
+      var sep = PRODUCTS_API_URL.indexOf('?') > -1 ? '&' : '?';
+      var script = document.createElement('script');
+      script.src = PRODUCTS_API_URL + sep + 'callback=' + callbackName + '&t=' + Date.now();
+      script.onerror = function(){
+        cleanup();
+        reject(new Error('JSONP script failed to load'));
+      };
+
+      timeoutId = setTimeout(function(){
+        cleanup();
+        reject(new Error('JSONP request timed out'));
+      }, 8000);
+
+      document.head.appendChild(script);
+    });
+  }
+
   function loadProducts(){
     if (PRODUCTS_API_URL){
-      var sep = PRODUCTS_API_URL.indexOf('?') > -1 ? '&' : '?';
-      return fetch(PRODUCTS_API_URL + sep + 't=' + Date.now())
-        .then(function(res){
-          if (!res.ok) throw new Error('Google Sheet API not reachable');
-          return res.json();
-        })
+      return loadProductsViaJsonp()
         .then(function(rows){
           var products = rows.map(function(row){
             return {
@@ -1581,6 +1656,29 @@
         btn.textContent = originalText;
         btn.classList.remove('added');
       }, 1300);
+    });
+
+    // Custom candle configurator
+    var CUSTOM_CANDLE_BASE_PRICE = 75;
+    document.getElementById('addCustomBtn').addEventListener('click', function(){
+      var bloom = document.getElementById('customBloom').value;
+      var color = document.getElementById('customColor').value;
+      var scent = document.getElementById('customScent').value;
+      var qty = parseInt(document.getElementById('customQty').value, 10) || 1;
+      var name = 'Custom ' + bloom + ' Candle — ' + color + ', ' + scent;
+
+      for (var i = 0; i < qty; i++){
+        addToCart(name, CUSTOM_CANDLE_BASE_PRICE);
+      }
+
+      var btn = document.getElementById('addCustomBtn');
+      var originalText = btn.textContent;
+      btn.textContent = 'Added to Order ✓';
+      var cartBtn = document.getElementById('cartToggle');
+      cartBtn.style.transform = 'scale(1.12)';
+      setTimeout(function(){ cartBtn.style.transform = ''; }, 220);
+      setTimeout(function(){ btn.textContent = originalText; }, 1600);
+      openCart();
     });
 
     // Cart panel open/close
