@@ -692,6 +692,49 @@
   .foot-bottom a{text-decoration:none;}
   .foot-bottom a:hover{color:var(--gold-bright);}
 
+  /* ---------- GALLERY LIGHTBOX ---------- */
+  .g-item{cursor:pointer;}
+  #galleryLightbox{
+    position:fixed; inset:0;
+    background:rgba(43,38,32,0.82);
+    z-index:210;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:40px 24px;
+  }
+  #galleryLightbox.open{display:flex;}
+  .lightbox-inner{
+    position:relative;
+    max-width:720px;
+    width:100%;
+    background:var(--ivory);
+    border:1px solid var(--gold);
+  }
+  .lightbox-inner img{
+    width:100%;
+    max-height:70vh;
+    object-fit:cover;
+    display:block;
+  }
+  .lightbox-caption{
+    padding:22px 26px;
+    font-family:'Cormorant Garamond', serif;
+    font-size:20px;
+    color:var(--charcoal);
+  }
+  #lightboxClose{
+    position:absolute;
+    top:-44px; right:0;
+    background:none;
+    border:none;
+    color:var(--ivory);
+    font-size:34px;
+    line-height:1;
+    cursor:pointer;
+  }
+  #lightboxClose:hover{color:var(--gold-bright);}
+
   /* ---------- FLOATING CART ---------- */
   #cartToggle{
     position:fixed;
@@ -1305,6 +1348,15 @@
 </button>
 
 <div id="cartOverlay"></div>
+
+<!-- GALLERY LIGHTBOX -->
+<div id="galleryLightbox">
+  <div class="lightbox-inner">
+    <button type="button" id="lightboxClose" aria-label="Close">&times;</button>
+    <img id="lightboxImg" src="" alt="">
+    <div class="lightbox-caption" id="lightboxCaption"></div>
+  </div>
+</div>
 <div id="cartPanel">
   <div class="cart-panel-head">
     <h3>Your Order</h3>
@@ -1686,6 +1738,47 @@
     document.getElementById('cartClose').addEventListener('click', closeCart);
     document.getElementById('cartOverlay').addEventListener('click', closeCart);
     document.getElementById('cartCheckoutBtn').addEventListener('click', function(){ closeCart(); });
+
+    // Mobile nav menu: close it after clicking a link inside it, or when clicking anywhere outside it
+    var navToggle = document.getElementById('nav-toggle');
+    document.querySelectorAll('nav.links a').forEach(function(link){
+      link.addEventListener('click', function(){
+        navToggle.checked = false;
+      });
+    });
+    document.addEventListener('click', function(e){
+      if (!navToggle.checked) return;
+      var clickedInsideMenu = e.target.closest('nav.links');
+      var clickedToggleLabel = e.target.closest('.burger');
+      if (!clickedInsideMenu && !clickedToggleLabel){
+        navToggle.checked = false;
+      }
+    });
+
+    // Gallery lightbox: click a photo to see it larger with its caption
+    var lightbox = document.getElementById('galleryLightbox');
+    var lightboxImg = document.getElementById('lightboxImg');
+    var lightboxCaption = document.getElementById('lightboxCaption');
+
+    document.querySelectorAll('.g-item').forEach(function(item){
+      item.addEventListener('click', function(){
+        var img = item.querySelector('img');
+        var captionEl = item.querySelector('.g-cap');
+        lightboxImg.src = img.src;
+        lightboxImg.alt = img.alt;
+        lightboxCaption.textContent = captionEl ? captionEl.textContent : '';
+        lightbox.classList.add('open');
+      });
+    });
+
+    function closeLightbox(){ lightbox.classList.remove('open'); }
+    document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', function(e){
+      if (e.target === lightbox) closeLightbox();
+    });
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape') closeLightbox();
+    });
 
     // Qty / remove buttons inside cart panel (event delegation)
     document.getElementById('cartItems').addEventListener('click', function(e){
