@@ -1666,6 +1666,9 @@
       var badgeClass = isCustom ? 'badge gold' : 'badge';
       var badgeText = isCustom ? 'Custom' : 'In Stock';
       if (soldOut){ badgeClass += ' sold-out'; badgeText = 'Sold Out'; }
+      var badgeHtml = (isCustom && !soldOut)
+        ? '<a href="#custom" class="' + badgeClass + '" style="text-decoration:none; cursor:pointer;">' + badgeText + '</a>'
+        : '<span class="' + badgeClass + '">' + badgeText + '</span>';
 
       var deliveryText = isCustom ? 'Made to order — up to 7 days' : '3–7 business days';
       var safeName = escapeHtml(p.name);
@@ -1679,7 +1682,7 @@
         '<div class="product-body">' +
           '<h3>' + safeName + '</h3>' +
           '<p class="desc">' + escapeHtml(p.description) + '</p>' +
-          '<div class="product-meta"><span class="price">$' + p.price.toFixed(0) + ' CAD</span><span class="' + badgeClass + '">' + badgeText + '</span></div>' +
+          '<div class="product-meta"><span class="price">$' + p.price.toFixed(0) + ' CAD</span>' + badgeHtml + '</div>' +
           '<span class="delivery-note">' + deliveryText + '</span>' +
           stockNoteHtml +
           '<button type="button" class="add-btn" data-name="' + safeName + '" data-price="' + p.price + '"' + btnDisabled + '>' + btnLabel + '</button>' +
@@ -1748,13 +1751,14 @@
     });
 
     // Ensure every "Design a Custom Candle" / "Custom Candles" link reliably scrolls
-    // to the Custom Candles section, accounting for the sticky header height
-    document.querySelectorAll('a[href="#custom"]').forEach(function(link){
-      link.addEventListener('click', function(e){
-        e.preventDefault();
-        var target = document.getElementById('custom');
-        if (target) target.scrollIntoView({behavior: 'smooth'});
-      });
+    // to the Custom Candles section — uses delegation so it also covers the "Custom"
+    // badge links on product cards, which are added to the page later/dynamically
+    document.addEventListener('click', function(e){
+      var link = e.target.closest('a[href="#custom"]');
+      if (!link) return;
+      e.preventDefault();
+      var target = document.getElementById('custom');
+      if (target) target.scrollIntoView({behavior: 'smooth'});
     });
     document.addEventListener('click', function(e){
       if (!navToggle.checked) return;
