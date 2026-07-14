@@ -1746,11 +1746,21 @@
         navToggle.checked = false;
       });
     });
+
+    // Ensure every "Design a Custom Candle" / "Custom Candles" link reliably scrolls
+    // to the Custom Candles section, accounting for the sticky header height
+    document.querySelectorAll('a[href="#custom"]').forEach(function(link){
+      link.addEventListener('click', function(e){
+        e.preventDefault();
+        var target = document.getElementById('custom');
+        if (target) target.scrollIntoView({behavior: 'smooth'});
+      });
+    });
     document.addEventListener('click', function(e){
       if (!navToggle.checked) return;
       var clickedInsideMenu = e.target.closest('nav.links');
-      var clickedToggleLabel = e.target.closest('.burger');
-      if (!clickedInsideMenu && !clickedToggleLabel){
+      var clickedToggle = e.target.closest('.burger') || e.target === navToggle;
+      if (!clickedInsideMenu && !clickedToggle){
         navToggle.checked = false;
       }
     });
