@@ -1071,7 +1071,7 @@
       <h2 class="section-title">A closer look at the studio</h2>
       <p class="section-sub">A glimpse of our blooms, our pours, and the details in between.</p>
       <div class="gallery-grid" style="margin-top:50px;">
-        <div class="g-item"><img data-img="gallery-1" alt="Studio candle pour"><div class="g-cap">The studio pour</div></div>
+        <div class="g-item"><img data-img="gallery-1" alt="The making of Peony Cascade"><div class="g-cap">The making of Peony Cascade</div></div>
         <div class="g-item"><img data-img="gallery-2" alt="Rose candle detail"><div class="g-cap">Petal detail</div></div>
         <div class="g-item"><img data-img="gallery-3" alt="Ivory candle palette"><div class="g-cap">The ivory palette</div></div>
         <div class="g-item"><img data-img="gallery-4" alt="Peony candle set"><div class="g-cap">Peony set</div></div>
@@ -1853,6 +1853,17 @@
     refreshImages(); // covers hero/about/gallery images, which don't depend on products.csv
   });
 })();
+</script>
+
+<!-- TEMPORARY DEBUG TOOL — remove this whole <script> block once the Google Sheet issue is diagnosed -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/eruda/3.2.3/eruda.min.js" onerror="alert('Debug tool failed to load — check your internet connection or try again.')"></script>
+<script>
+  if (typeof eruda !== 'undefined') {
+    eruda.init();
+    alert('Debug tool loaded — tap the floating circle button to open it.');
+  } else {
+    alert('Debug tool script did not load.');
+  }
 </script>
 
 </body>
