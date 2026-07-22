@@ -1856,8 +1856,15 @@
 </script>
 
 <!-- TEMPORARY DEBUG TOOL — remove this whole <script> block once the Google Sheet issue is diagnosed -->
-<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-<script>eruda.init();</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/eruda/3.2.3/eruda.min.js" onerror="alert('Debug tool failed to load — check your internet connection or try again.')"></script>
+<script>
+  if (typeof eruda !== 'undefined') {
+    eruda.init();
+    alert('Debug tool loaded — tap the floating circle button to open it.');
+  } else {
+    alert('Debug tool script did not load.');
+  }
+</script>
 
 </body>
 </html>
