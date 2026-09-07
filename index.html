@@ -718,10 +718,22 @@
     display:block;
   }
   .lightbox-caption{
-    padding:22px 26px;
-    font-family:'Cormorant Garamond', serif;
-    font-size:20px;
+    padding:22px 26px 24px;
     color:var(--charcoal);
+  }
+  .lightbox-title{
+    font-family:'Cormorant Garamond', serif;
+    font-size:23px;
+    line-height:1.2;
+    font-weight:500;
+    color:var(--charcoal);
+    margin-bottom:8px;
+  }
+  .lightbox-description{
+    font-family:'Jost', sans-serif;
+    font-size:14px;
+    line-height:1.7;
+    color:var(--charcoal-soft);
   }
   #lightboxClose{
     position:absolute;
@@ -1069,16 +1081,16 @@
     <div class="wrap">
       <span class="eyebrow">Gallery</span>
       <h2 class="section-title">A closer look at the studio</h2>
-      <p class="section-sub">A glimpse of our blooms, our pours, and the details in between.</p>
+      <p class="section-sub">Step inside the Maison YoRa process — from hand-shaped soy-wax blooms to the final gift-ready arrangement.</p>
       <div class="gallery-grid" style="margin-top:50px;">
-        <div class="g-item"><img data-img="gallery-1" alt="The making of Peony Cascade"><div class="g-cap">The making of Peony Cascade</div></div>
-        <div class="g-item"><img data-img="gallery-2" alt="Rose candle detail"><div class="g-cap">Petal detail</div></div>
-        <div class="g-item"><img data-img="gallery-3" alt="Ivory candle palette"><div class="g-cap">The ivory palette</div></div>
-        <div class="g-item"><img data-img="gallery-4" alt="Peony candle set"><div class="g-cap">Peony set</div></div>
-        <div class="g-item"><img data-img="gallery-5" alt="Gift packaging"><div class="g-cap">Gift-ready packaging</div></div>
-        <div class="g-item"><img data-img="gallery-6" alt="Orchid candle bloom"><div class="g-cap">Orchid bloom</div></div>
-        <div class="g-item"><img data-img="gallery-7" alt="Soy wax texture detail"><div class="g-cap">Soy wax texture</div></div>
-        <div class="g-item"><img data-img="gallery-8" alt="Finished custom order"><div class="g-cap">A finished order</div></div>
+        <div class="g-item" data-title="Petal by Petal — Handcrafting Our Peonies" data-description="Each bloom begins with soy wax and is shaped by hand, petal by petal. Small variations in the curves and edges are part of the character of every Maison YoRa flower."><img data-img="gallery-1" alt="Hands shaping a handcrafted Maison YoRa soy-wax peony"><div class="g-cap">Petal by Petal — Handcrafting Our Peonies</div></div>
+        <div class="g-item" data-title="The Details That Make Every Bloom Unique" data-description="A closer look at the folds, edges, and layered texture that give each wax flower its natural character. Because each bloom is handcrafted, no two pieces are exactly alike."><img data-img="gallery-2" alt="Close-up of the layered petal details on a handcrafted wax flower"><div class="g-cap">The Details That Make Every Bloom Unique</div></div>
+        <div class="g-item" data-title="A Palette Inspired by Nature" data-description="Soft ivory, blush, botanical greens, and other refined tones highlight the sculpted floral forms while keeping the finished candle elegant and easy to style at home."><img data-img="gallery-3" alt="Maison YoRa soy-wax flowers arranged in a soft nature-inspired colour palette"><div class="g-cap">A Palette Inspired by Nature</div></div>
+        <div class="g-item" data-title="From Individual Blooms to a Finished Bouquet" data-description="Finished candle flowers are thoughtfully arranged with complementary dried florals and wrapping to create a balanced bouquet designed for display and meaningful gifting."><img data-img="gallery-4" alt="Finished Maison YoRa handcrafted candle flower bouquet"><div class="g-cap">From Individual Blooms to a Finished Bouquet</div></div>
+        <div class="g-item" data-title="Wrapped and Prepared for Gifting" data-description="Each completed piece is carefully presented with protective wrapping and Maison YoRa finishing details so it arrives ready to give — or to enjoy at home."><img data-img="gallery-5" alt="Maison YoRa candle arranged in luxury gift-ready packaging"><div class="g-cap">Wrapped and Prepared for Gifting</div></div>
+        <div class="g-item" data-title="Sculpting Each Botanical Detail" data-description="From roses and peonies to other floral forms, each soy-wax bloom is finished by hand with attention to the small details that give the candle its botanical character."><img data-img="gallery-6" alt="Sculpted botanical details on a handcrafted Maison YoRa wax bloom"><div class="g-cap">Sculpting Each Botanical Detail</div></div>
+        <div class="g-item" data-title="From Soy Wax to Sculpted Bloom" data-description="Maison YoRa candles are handcrafted in small batches using 100% natural soy wax. The process focuses on careful shaping, clean materials, and hand-finished detail throughout."><img data-img="gallery-7" alt="Soy wax and hand-finishing details from the Maison YoRa candle-making process"><div class="g-cap">From Soy Wax to Sculpted Bloom</div></div>
+        <div class="g-item" data-title="The Final Maison YoRa Touch" data-description="Before an order is ready, the candle or bouquet is checked, arranged, and presented with the finishing details that complete the Maison YoRa experience."><img data-img="gallery-8" alt="Finished Maison YoRa candle order prepared and ready for gifting"><div class="g-cap">The Final Maison YoRa Touch</div></div>
       </div>
     </div>
   </section>
@@ -1354,7 +1366,10 @@
   <div class="lightbox-inner">
     <button type="button" id="lightboxClose" aria-label="Close">&times;</button>
     <img id="lightboxImg" src="" alt="">
-    <div class="lightbox-caption" id="lightboxCaption"></div>
+    <div class="lightbox-caption" id="lightboxCaption">
+      <div class="lightbox-title" id="lightboxTitle"></div>
+      <div class="lightbox-description" id="lightboxDescription"></div>
+    </div>
   </div>
 </div>
 <div id="cartPanel">
@@ -1741,18 +1756,22 @@
       }
     });
 
-    // Gallery lightbox: click a photo to see it larger with its caption
+    // Gallery lightbox: click a photo to see it larger with its title and process story
     var lightbox = document.getElementById('galleryLightbox');
     var lightboxImg = document.getElementById('lightboxImg');
-    var lightboxCaption = document.getElementById('lightboxCaption');
+    var lightboxTitle = document.getElementById('lightboxTitle');
+    var lightboxDescription = document.getElementById('lightboxDescription');
 
     document.querySelectorAll('.g-item').forEach(function(item){
       item.addEventListener('click', function(){
         var img = item.querySelector('img');
         var captionEl = item.querySelector('.g-cap');
+        var title = item.getAttribute('data-title') || (captionEl ? captionEl.textContent : '');
+        var description = item.getAttribute('data-description') || '';
         lightboxImg.src = img.src;
         lightboxImg.alt = img.alt;
-        lightboxCaption.textContent = captionEl ? captionEl.textContent : '';
+        lightboxTitle.textContent = title;
+        lightboxDescription.textContent = description;
         lightbox.classList.add('open');
       });
     });
