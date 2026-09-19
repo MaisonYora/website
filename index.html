@@ -2172,20 +2172,21 @@
         })
         .then(function(data){
           var reviews = Array.isArray(data.reviews) ? data.reviews : [];
+          var summary = data.summary || {};
+          var approvedCount = Math.max(0, Number(summary.count) || 0);
+          var approvedAverage = Number(summary.average) || 0;
           grid.innerHTML = '';
           if (!reviews.length){
             var empty = document.createElement('p');
             empty.className = 'review-form-note';
-            empty.textContent = 'No approved reviews have been published yet.';
+            empty.textContent = 'No reviews yet. Be the first to share your Maison YoRa experience.';
             grid.appendChild(empty);
             avg.textContent = '—';
             count.textContent = 'No approved reviews yet';
             return;
           }
-          var sum = 0;
           reviews.forEach(function(r){
             var rating = Math.max(1, Math.min(5, Number(r.rating) || 0));
-            sum += rating;
             var card = document.createElement('div');
             card.className = 'review-card';
             var stars = document.createElement('span');
@@ -2211,8 +2212,8 @@
             card.appendChild(stars); card.appendChild(text); card.appendChild(who);
             grid.appendChild(card);
           });
-          avg.textContent = (sum / reviews.length).toFixed(1);
-          count.textContent = 'Based on ' + reviews.length + ' approved review' + (reviews.length === 1 ? '' : 's');
+          avg.textContent = approvedAverage ? approvedAverage.toFixed(1) : '—';
+          count.textContent = 'Based on ' + approvedCount + ' approved review' + (approvedCount === 1 ? '' : 's');
         })
         .catch(function(){
           grid.innerHTML = '<p class="review-form-note">Approved reviews are temporarily unavailable.</p>';
