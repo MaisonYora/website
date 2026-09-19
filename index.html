@@ -358,6 +358,81 @@
   .feature-card h3{font-size:22px; margin-bottom:12px;}
   .feature-card p{font-size:15px; color:var(--charcoal-soft);}
 
+
+  /* ---------- CUSTOM BUILDER ---------- */
+  .custom-builder{
+    margin:58px auto 0;
+    display:grid;
+    grid-template-columns:minmax(250px,.78fr) minmax(0,1.35fr);
+    gap:20px;
+    max-width:980px;
+    text-align:left;
+  }
+  .custom-builder-panel{
+    background:var(--white);
+    border:1px solid var(--line);
+    padding:34px;
+  }
+  .custom-builder-label{
+    display:block;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.15em;
+    color:var(--gold-deep);
+    margin-bottom:12px;
+  }
+  .custom-product-choices{display:grid; gap:12px; margin-top:22px;}
+  .custom-product-choice{
+    width:100%;
+    border:1px solid var(--line);
+    background:var(--ivory);
+    padding:18px;
+    text-align:left;
+    cursor:pointer;
+    font-family:'Jost',sans-serif;
+    color:var(--charcoal);
+    transition:border-color .2s ease, background .2s ease, transform .2s ease;
+  }
+  .custom-product-choice:hover{border-color:var(--gold); transform:translateY(-1px);}
+  .custom-product-choice.active{border-color:var(--gold-deep); background:var(--white); box-shadow:inset 3px 0 0 var(--gold-deep);}
+  .custom-product-choice strong{
+    display:block;
+    font-family:'Cormorant Garamond',serif;
+    font-size:22px;
+    font-weight:600;
+    margin-bottom:5px;
+  }
+  .custom-product-choice .from-price{font-size:12px; color:var(--gold-deep); letter-spacing:.04em;}
+  .custom-product-choice .choice-desc{display:block; font-size:13px; color:var(--charcoal-soft); margin-top:8px; line-height:1.55;}
+  .custom-builder-head{
+    display:flex;
+    justify-content:space-between;
+    gap:24px;
+    align-items:flex-start;
+    padding-bottom:20px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:24px;
+  }
+  .custom-builder-head h3{font-size:28px; margin:0 0 7px;}
+  .custom-builder-head p{font-size:14px; color:var(--charcoal-soft); max-width:510px;}
+  .custom-live-price{white-space:nowrap; text-align:right;}
+  .custom-live-price span{display:block; font-size:10px; text-transform:uppercase; letter-spacing:.12em; color:var(--charcoal-soft);}
+  .custom-live-price strong{font-family:'Cormorant Garamond',serif; font-size:30px; color:var(--gold-deep); font-weight:600;}
+  .custom-fields{display:grid; grid-template-columns:1fr 1fr; gap:0 20px;}
+  .custom-price-summary{
+    margin:4px 0 20px;
+    padding:16px 18px;
+    background:var(--ivory-deep);
+    border:1px solid var(--line);
+    font-size:13px;
+    color:var(--charcoal-soft);
+  }
+  .custom-price-summary .price-row{display:flex; justify-content:space-between; gap:18px; padding:5px 0;}
+  .custom-price-summary .price-row.total{margin-top:8px; padding-top:12px; border-top:1px solid var(--line); color:var(--charcoal); font-weight:500;}
+  .custom-builder-note{font-size:12.5px; color:var(--charcoal-soft); margin-top:13px; line-height:1.6;}
+  .custom-loading{font-size:14px; color:var(--charcoal-soft); padding:14px 0;}
+  .custom-error{font-size:14px; color:#8a3f37; padding:14px; border:1px solid #d7b1ab; background:#fff8f6;}
+
   /* ---------- SHOP ---------- */
   .shop-note{
     display:flex; gap:40px; flex-wrap:wrap;
@@ -854,6 +929,7 @@
 
   /* ---------- RESPONSIVE ---------- */
   @media (max-width: 900px){
+    .custom-builder{grid-template-columns:1fr;}
     .hero-inner, .about-grid, .checkout-grid, .contact-grid{grid-template-columns:1fr;}
     .hero-visual{order:-1;}
     .feature-grid, .products{grid-template-columns:repeat(2,1fr);}
@@ -864,6 +940,10 @@
   }
 
   @media (max-width: 720px){
+    .custom-builder-panel{padding:24px 20px;}
+    .custom-builder-head{display:block;}
+    .custom-live-price{text-align:left; margin-top:14px;}
+    .custom-fields{grid-template-columns:1fr;}
     nav.links{
       position:fixed; top:0; right:0;
       height:100vh; width:78%;
@@ -927,7 +1007,7 @@
     </a>
     <nav class="links">
       <a href="#about">About</a>
-      <a href="#custom">Custom Candles</a>
+      <a href="#custom">Custom Pieces</a>
       <a href="#shop">Shop</a>
       <a href="#gallery">Gallery</a>
       <a href="#reviews">Reviews</a>
@@ -954,7 +1034,7 @@
         <p>Every Maison YoRa candle is thoughtfully designed to complement modern interiors with timeless elegance. Combining sophisticated fragrance, refined craftsmanship, and luxurious presentation, our collections are created to transform everyday rituals into memorable experiences and make every gift feel truly special.</p>
         <div class="btn-row">
           <a href="#shop" class="btn btn-primary">Shop the Collection</a>
-          <a href="#custom" class="btn btn-outline">Design a Custom Candle</a>
+          <a href="#custom" class="btn btn-outline">Create a Custom Piece</a>
         </div>
       </div>
       <div class="hero-visual">
@@ -988,72 +1068,66 @@
     </div>
   </section>
 
-  <!-- CUSTOM FLOWER FEATURE -->
+  <!-- CUSTOM PIECES -->
   <section class="feature" id="custom">
     <div class="photo-bg"></div>
     <div class="wrap">
-      <span class="eyebrow">The Signature Offering</span>
-      <h2 class="section-title">Structural flower candles, made for you</h2>
-      <p class="section-sub center">Choose your bloom, your palette, and your scent. Our structural flower candles are built in layers of sculpted soy wax petals around a slow-burning core — a centrepiece as much as a candle.</p>
+      <span class="eyebrow">Made Especially for You</span>
+      <h2 class="section-title">Create your custom Maison YoRa piece</h2>
+      <p class="section-sub center">Choose between a sculpted custom candle or a custom flower bouquet, then personalize the available design details. Product choices, options and pricing are updated directly from our studio catalogue.</p>
+
       <div class="feature-grid">
         <div class="feature-card">
-          <span class="num">Choose</span>
-          <h3>Select a Bloom</h3>
-          <p>Rose, peony, orchid, or ranunculus — each sculpted as a true structural form, not a printed pattern.</p>
+          <span class="num">01 · Choose</span>
+          <h3>Select Your Piece</h3>
+          <p>Start with a custom candle or custom flower bouquet. Each piece is handcrafted to order in our Toronto studio.</p>
         </div>
         <div class="feature-card">
-          <span class="num">Customize</span>
-          <h3>Palette &amp; Scent</h3>
-          <p>Pick from our ivory-toned palette and a fragrance profile, from soft botanical to warm amber woods.</p>
+          <span class="num">02 · Personalize</span>
+          <h3>Design the Details</h3>
+          <p>Choose from the bloom, palette, scent, size, packaging and other options currently available for your selected piece.</p>
         </div>
         <div class="feature-card">
-          <span class="num">Receive</span>
-          <h3>Hand-Delivered Care</h3>
-          <p>Every custom piece is poured to order and delivered within 7 days, packaged for gifting.</p>
+          <span class="num">03 · Confirm</span>
+          <h3>See Your Price</h3>
+          <p>Your total updates as you design. Add your finished configuration to the order and complete payment securely at checkout.</p>
         </div>
       </div>
 
-      <div class="form-card" style="max-width:640px; margin:56px auto 0; text-align:left;">
-        <h3 style="margin-bottom:22px;">Design Your Custom Candle</h3>
-        <div class="form-row">
-          <div class="field">
-            <label>Bloom</label>
-            <select id="customBloom">
-              <option value="Rose">Rose</option>
-              <option value="Peony">Peony</option>
-              <option value="Orchid">Orchid</option>
-              <option value="Ranunculus">Ranunculus</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Colour</label>
-            <select id="customColor">
-              <option value="Ivory White">Ivory White</option>
-              <option value="Blush Pink">Blush Pink</option>
-              <option value="Champagne Gold">Champagne Gold</option>
-              <option value="Sage Green">Sage Green</option>
-              <option value="Terracotta">Terracotta</option>
-            </select>
+      <div class="custom-builder" id="customBuilder">
+        <div class="custom-builder-panel">
+          <span class="custom-builder-label">Step 1 · Select a product</span>
+          <h3 style="font-size:26px; margin-bottom:8px;">What would you like to create?</h3>
+          <p style="font-size:14px; color:var(--charcoal-soft);">Choose a base product to see its current options and pricing.</p>
+          <div id="customProductChoices" class="custom-product-choices">
+            <div class="custom-loading">Loading custom products…</div>
           </div>
         </div>
-        <div class="form-row">
-          <div class="field">
-            <label>Scent</label>
-            <select id="customScent">
-              <option value="Garden Rose & White Musk">Garden Rose &amp; White Musk</option>
-              <option value="Peony & Pear">Peony &amp; Pear</option>
-              <option value="Jasmine & Sandalwood">Jasmine &amp; Sandalwood</option>
-              <option value="Amber & Woods">Amber &amp; Woods</option>
-              <option value="Unscented">Unscented</option>
-            </select>
+
+        <div class="custom-builder-panel">
+          <span class="custom-builder-label">Step 2 · Personalize</span>
+          <div class="custom-builder-head">
+            <div>
+              <h3 id="customBuilderTitle">Select a custom product</h3>
+              <p id="customBuilderDescription">Your available design choices will appear here.</p>
+            </div>
+            <div class="custom-live-price">
+              <span>Current price</span>
+              <strong id="customLivePrice">—</strong>
+            </div>
           </div>
-          <div class="field">
+
+          <div id="customOptionFields" class="custom-fields"></div>
+
+          <div class="field" id="customQtyWrap" style="max-width:220px; display:none;">
             <label>Quantity</label>
             <input type="number" id="customQty" value="1" min="1" max="10">
           </div>
+
+          <div id="customPriceSummary" class="custom-price-summary" style="display:none;"></div>
+          <button type="button" class="btn btn-primary" id="addCustomBtn" style="width:100%; border:none;" disabled>Select a Product</button>
+          <p class="custom-builder-note">Custom products are made to order. Availability and pricing shown here are loaded from the Maison YoRa studio catalogue and re-verified securely when you proceed to payment.</p>
         </div>
-        <p style="font-size:14px; color:var(--charcoal-soft); margin-bottom:18px;">Starting at <strong style="color:var(--gold-deep);">$75 CAD</strong> per candle. Final pricing is confirmed with you after we review your design — some bloom and finish combinations may adjust the price slightly.</p>
-        <button type="button" class="btn btn-primary" id="addCustomBtn" style="width:100%; border:none;">Add Custom Candle to Order</button>
       </div>
     </div>
   </section>
@@ -1066,7 +1140,7 @@
       <p class="section-sub">From made-to-order structural blooms to our everyday ivory essentials — every piece is hand-poured in small batches.</p>
 
       <div class="shop-note">
-        <div><strong>Custom structural candles</strong> — made to order, delivered within up to 7 days.</div>
+        <div><strong>Custom candles &amp; flower bouquets</strong> — handcrafted to order; timing is confirmed with your order.</div>
         <div><strong>Signature &amp; everyday candles</strong> — in stock, delivered in 3–7 business days.</div>
       </div>
 
@@ -1319,7 +1393,7 @@
       <div>
         <h4>Shop</h4>
         <ul>
-          <li><a href="#custom">Custom Candles</a></li>
+          <li><a href="#custom">Custom Pieces</a></li>
           <li><a href="#shop">Signature Collection</a></li>
           <li><a href="track-order.html">Track an Order</a></li>
         </ul>
@@ -1394,7 +1468,7 @@
   var SHIPPING_FEE = 12;
   var FREE_SHIPPING_THRESHOLD = 75;
 
-  var cart = []; // {name, price, qty}
+  var cart = []; // {name, price, qty, custom?}
 
   function money(n){ return '$' + n.toFixed(2); }
 
@@ -1403,10 +1477,10 @@
     return null;
   }
 
-  function addToCart(name, price){
+  function addToCart(name, price, customMeta){
     var existing = findItem(name);
     if (existing){ existing.qty += 1; }
-    else { cart.push({name: name, price: price, qty: 1}); }
+    else { cart.push({name: name, price: price, qty: 1, custom: customMeta || null}); }
     renderAll();
   }
 
@@ -1532,6 +1606,11 @@
   // Reads the Sheet at: https://docs.google.com/spreadsheets/d/1YQRL0Qx3x5G9IqFR2CthlT-4tiaYMDoEBlRFbeHOSBg
   // Leave this as an empty string to keep using the local products.csv file in the repo instead.
   var PRODUCTS_API_URL = 'https://opensheet.elk.sh/1YQRL0Qx3x5G9IqFR2CthlT-4tiaYMDoEBlRFbeHOSBg/1';
+  var CUSTOM_PRODUCTS_API_URL = 'https://opensheet.elk.sh/1YQRL0Qx3x5G9IqFR2CthlT-4tiaYMDoEBlRFbeHOSBg/CustomProducts';
+  var CUSTOM_OPTIONS_API_URL = 'https://opensheet.elk.sh/1YQRL0Qx3x5G9IqFR2CthlT-4tiaYMDoEBlRFbeHOSBg/CustomOptions';
+  var customProducts = [];
+  var customOptions = [];
+  var selectedCustomProductId = '';
 
   function loadProducts(){
     if (PRODUCTS_API_URL){
@@ -1595,6 +1674,177 @@
         if (grid) grid.innerHTML = '<p style="grid-column:1/-1; font-size:14px; color:var(--charcoal-soft);">Candles could not be loaded right now. Please refresh the page.</p>';
         console.log('Could not load products.csv:', err.message);
       });
+  }
+
+
+  function isSheetActive(value){
+    var v = String(value == null ? '' : value).trim().toLowerCase();
+    return v === '' || v === 'true' || v === 'yes' || v === '1' || v === 'active';
+  }
+
+  function numeric(value, fallback){
+    var n = parseFloat(value);
+    return isFinite(n) ? n : fallback;
+  }
+
+  function sortNumber(value){
+    var n = parseFloat(value);
+    return isFinite(n) ? n : 9999;
+  }
+
+  function loadCustomConfigurator(){
+    var choices = document.getElementById('customProductChoices');
+    return Promise.all([
+      fetch(CUSTOM_PRODUCTS_API_URL, {cache:'no-store'}).then(function(r){ if (!r.ok) throw new Error('CustomProducts sheet returned ' + r.status); return r.json(); }),
+      fetch(CUSTOM_OPTIONS_API_URL, {cache:'no-store'}).then(function(r){ if (!r.ok) throw new Error('CustomOptions sheet returned ' + r.status); return r.json(); })
+    ]).then(function(results){
+      customProducts = results[0].map(function(row){
+        return {
+          product_id: String(row.product_id || '').trim(),
+          product_name: String(row.product_name || '').trim(),
+          base_price: numeric(row.base_price, NaN),
+          active: isSheetActive(row.active),
+          sort_order: sortNumber(row.sort_order),
+          description: String(row.description || '').trim()
+        };
+      }).filter(function(p){ return p.product_id && p.product_name && isFinite(p.base_price) && p.base_price >= 0 && p.active; })
+        .sort(function(a,b){ return a.sort_order - b.sort_order; });
+
+      customOptions = results[1].map(function(row){
+        return {
+          product_id: String(row.product_id || '').trim(),
+          category: String(row.category || '').trim(),
+          option: String(row.option || '').trim(),
+          price_adjustment: numeric(row.price_adjustment, 0),
+          active: isSheetActive(row.active),
+          sort_order: sortNumber(row.sort_order),
+          description: String(row.description || '').trim()
+        };
+      }).filter(function(o){ return o.product_id && o.category && o.option && o.active; });
+
+      if (!customProducts.length) throw new Error('No active custom products were found.');
+      renderCustomProductChoices();
+      selectCustomProduct(customProducts[0].product_id);
+    }).catch(function(err){
+      choices.innerHTML = '<div class="custom-error">Custom designs could not be loaded right now. Please refresh the page or contact Maison YoRa.</div>';
+      document.getElementById('addCustomBtn').disabled = true;
+      document.getElementById('customBuilderTitle').textContent = 'Custom catalogue unavailable';
+      document.getElementById('customBuilderDescription').textContent = 'We could not load the current design options.';
+      console.log('Could not load custom catalogue:', err.message);
+    });
+  }
+
+  function renderCustomProductChoices(){
+    var container = document.getElementById('customProductChoices');
+    var html = '';
+    customProducts.forEach(function(p){
+      html += '<button type="button" class="custom-product-choice' + (p.product_id === selectedCustomProductId ? ' active' : '') + '" data-product-id="' + escapeHtml(p.product_id) + '">' +
+        '<strong>' + escapeHtml(p.product_name) + '</strong>' +
+        '<span class="from-price">From ' + money(p.base_price) + ' CAD</span>' +
+        (p.description ? '<span class="choice-desc">' + escapeHtml(p.description) + '</span>' : '') +
+      '</button>';
+    });
+    container.innerHTML = html;
+  }
+
+  function getSelectedCustomProduct(){
+    return customProducts.find(function(p){ return p.product_id === selectedCustomProductId; }) || null;
+  }
+
+  function optionsForProduct(productId){
+    return customOptions.filter(function(o){ return o.product_id === productId; });
+  }
+
+  function categoriesForProduct(productId){
+    var seen = {};
+    var cats = [];
+    optionsForProduct(productId).forEach(function(o){
+      if (!seen[o.category]){
+        seen[o.category] = true;
+        cats.push(o.category);
+      }
+    });
+    return cats;
+  }
+
+  function selectCustomProduct(productId){
+    selectedCustomProductId = productId;
+    renderCustomProductChoices();
+    var product = getSelectedCustomProduct();
+    if (!product) return;
+
+    document.getElementById('customBuilderTitle').textContent = product.product_name;
+    document.getElementById('customBuilderDescription').textContent = product.description || 'Choose the available options below to personalize your piece.';
+    document.getElementById('customQtyWrap').style.display = '';
+    document.getElementById('addCustomBtn').disabled = false;
+    document.getElementById('addCustomBtn').textContent = 'Add ' + product.product_name + ' to Order';
+
+    var fields = document.getElementById('customOptionFields');
+    var html = '';
+    categoriesForProduct(product.product_id).forEach(function(category, categoryIndex){
+      var opts = optionsForProduct(product.product_id)
+        .filter(function(o){ return o.category === category; })
+        .sort(function(a,b){ return a.sort_order - b.sort_order; });
+      if (!opts.length) return;
+      var selectId = 'customOption_' + categoryIndex;
+      html += '<div class="field"><label>' + escapeHtml(category) + '</label><select id="' + selectId + '" class="custom-option-select" data-category="' + escapeHtml(category) + '">';
+      opts.forEach(function(o){
+        var adjustment = o.price_adjustment === 0 ? '' : ' (' + (o.price_adjustment > 0 ? '+' : '−') + money(Math.abs(o.price_adjustment)) + ')';
+        html += '<option value="' + escapeHtml(o.option) + '">' + escapeHtml(o.option + adjustment) + '</option>';
+      });
+      html += '</select></div>';
+    });
+    fields.innerHTML = html;
+    updateCustomPrice();
+  }
+
+  function selectedCustomConfiguration(){
+    var product = getSelectedCustomProduct();
+    if (!product) return null;
+    var selections = {};
+    var total = product.base_price;
+    var detailRows = [{label:'Base price', value:product.base_price}];
+
+    document.querySelectorAll('.custom-option-select').forEach(function(select){
+      var category = select.getAttribute('data-category');
+      var value = select.value;
+      selections[category] = value;
+      var match = customOptions.find(function(o){
+        return o.product_id === product.product_id && o.category === category && o.option === value && o.active;
+      });
+      var adjustment = match ? match.price_adjustment : 0;
+      total += adjustment;
+      detailRows.push({label:category + ': ' + value, value:adjustment});
+    });
+
+    return {product:product, selections:selections, total:total, detailRows:detailRows};
+  }
+
+  function updateCustomPrice(){
+    var config = selectedCustomConfiguration();
+    if (!config){
+      document.getElementById('customLivePrice').textContent = '—';
+      document.getElementById('customPriceSummary').style.display = 'none';
+      return;
+    }
+    document.getElementById('customLivePrice').textContent = money(config.total) + ' CAD';
+    var summary = document.getElementById('customPriceSummary');
+    var html = '';
+    config.detailRows.forEach(function(row){
+      var amount = row.value === 0 ? 'Included' : (row.value > 0 ? '+' : '−') + money(Math.abs(row.value));
+      html += '<div class="price-row"><span>' + escapeHtml(row.label) + '</span><span>' + amount + '</span></div>';
+    });
+    html += '<div class="price-row total"><span>Current unit price</span><span>' + money(config.total) + ' CAD</span></div>';
+    summary.innerHTML = html;
+    summary.style.display = '';
+  }
+
+  function buildCustomCartName(config){
+    var parts = [];
+    Object.keys(config.selections).forEach(function(category){
+      parts.push(category + ': ' + config.selections[category]);
+    });
+    return config.product.product_name + (parts.length ? ' — ' + parts.join(' · ') : '');
   }
 
   function escapeHtml(str){
@@ -1667,18 +1917,27 @@
       }, 1300);
     });
 
-    // Custom candle configurator
-    var CUSTOM_CANDLE_BASE_PRICE = 75;
-    document.getElementById('addCustomBtn').addEventListener('click', function(){
-      var bloom = document.getElementById('customBloom').value;
-      var color = document.getElementById('customColor').value;
-      var scent = document.getElementById('customScent').value;
-      var qty = parseInt(document.getElementById('customQty').value, 10) || 1;
-      var name = 'Custom ' + bloom + ' Candle — ' + color + ', ' + scent;
+    // Custom product configurator (Google Sheet driven)
+    document.getElementById('customProductChoices').addEventListener('click', function(e){
+      var choice = e.target.closest('.custom-product-choice');
+      if (!choice) return;
+      selectCustomProduct(choice.getAttribute('data-product-id'));
+    });
 
-      for (var i = 0; i < qty; i++){
-        addToCart(name, CUSTOM_CANDLE_BASE_PRICE);
-      }
+    document.getElementById('customOptionFields').addEventListener('change', function(e){
+      if (e.target.classList.contains('custom-option-select')) updateCustomPrice();
+    });
+
+    document.getElementById('addCustomBtn').addEventListener('click', function(){
+      var config = selectedCustomConfiguration();
+      if (!config) return;
+      var qty = parseInt(document.getElementById('customQty').value, 10) || 1;
+      qty = Math.max(1, Math.min(10, qty));
+      document.getElementById('customQty').value = qty;
+      var name = buildCustomCartName(config);
+      var customMeta = {product_id: config.product.product_id, selections: config.selections};
+
+      for (var i = 0; i < qty; i++) addToCart(name, config.total, customMeta);
 
       var btn = document.getElementById('addCustomBtn');
       var originalText = btn.textContent;
@@ -1806,7 +2065,7 @@
       statusEl.textContent = '';
 
       var payload = {
-        items: cart.map(function(item){ return {name:item.name, qty:item.qty}; }),
+        items: cart.map(function(item){ return {name:item.name, qty:item.qty, custom:item.custom || null}; }),
         customer: {
           name: document.getElementById('shipName').value,
           email: document.getElementById('shipEmail').value,
@@ -1847,6 +2106,7 @@
     loadProducts().then(function(){
       refreshImages();
     });
+    loadCustomConfigurator();
     refreshImages(); // covers hero/about/gallery images, which don't depend on products.csv
   });
 })();

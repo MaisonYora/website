@@ -1,7 +1,9 @@
-const PRODUCTS_API_URL = 'https://opensheet.elk.sh/1YQRL0Qx3x5G9IqFR2CthlT-4tiaYMDoEBlRFbeHOSBg/1';
+const SHEET_ID = '1YQRL0Qx3x5G9IqFR2CthlT-4tiaYMDoEBlRFbeHOSBg';
+const PRODUCTS_API_URL = `https://opensheet.elk.sh/${SHEET_ID}/1`;
+const CUSTOM_PRODUCTS_API_URL = `https://opensheet.elk.sh/${SHEET_ID}/CustomProducts`;
+const CUSTOM_OPTIONS_API_URL = `https://opensheet.elk.sh/${SHEET_ID}/CustomOptions`;
 const SHIPPING_FEE_CENTS = 1200;
 const FREE_SHIPPING_THRESHOLD_CENTS = 7500; // Free only when merchandise subtotal is OVER $75.
-const CUSTOM_CANDLE_PRICE_CENTS = 7500;
 
 function response(statusCode, body) {
   return {
@@ -15,41 +17,99 @@ function clean(value, max = 180) {
   return String(value || '').trim().slice(0, max);
 }
 
+function active(value) {
+  const v = String(value == null ? '' : value).trim().toLowerCase();
+  return v === '' || v === 'true' || v === 'yes' || v === '1' || v === 'active';
+}
+
 function validCanadianPostal(value) {
   return /^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/.test(clean(value));
 }
 
-async function loadProducts(siteUrl) {
-  let res;
-  try {
-    res = await fetch(PRODUCTS_API_URL, { headers: { 'User-Agent': 'Maison-YoRa-Checkout/1.0' } });
-    if (res.ok) {
-      const rows = await res.json();
-      return rows.map(row => ({
-        name: clean(row.name, 200),
-        priceCents: Math.round(Number(row.price) * 100),
-        quantity: Number.parseInt(row.quantity, 10)
-      })).filter(p => p.name && Number.isFinite(p.priceCents) && p.priceCents >= 0);
-    }
-  } catch (_) {}
+async function fetchJson(url) {
+  const res = await fetch(url, { headers: { 'User-Agent': 'Maison-YoRa-Checkout/2.0' }, cache: 'no-store' });
+  if (!res.ok) throw new Error(`Catalogue request failed with status ${res.status}.`);
+  return res.json();
+}
 
-  // Fallback to the same products.csv deployed with the site.
-  const csvRes = await fetch(siteUrl.replace(/\/$/, '') + '/products.csv', { cache: 'no-store' });
-  if (!csvRes.ok) throw new Error('Unable to load the product catalogue.');
-  const text = await csvRes.text();
-  const lines = text.trim().split(/\r?\n/);
-  const products = [];
-  for (let i = 1; i < lines.length; i++) {
-    const parts = lines[i].split(',');
-    if (parts.length < 6) continue;
-    const name = clean(parts[0], 200);
-    const priceCents = Math.round(Number(parts[2]) * 100);
-    const quantity = Number.parseInt(parts[5], 10);
-    if (name && Number.isFinite(priceCents) && priceCents >= 0) {
-      products.push({ name, priceCents, quantity });
+async function loadProducts(siteUrl) {
+  try {
+    const rows = await fetchJson(PRODUCTS_API_URL);
+    return rows.map(row => ({
+      name: clean(row.name, 200),
+      priceCents: Math.round(Number(row.price) * 100),
+      quantity: Number.parseInt(row.quantity, 10)
+    })).filter(p => p.name && Number.isFinite(p.priceCents) && p.priceCents >= 0);
+  } catch (_) {
+    // Fallback to the same products.csv deployed with the site.
+    const csvRes = await fetch(siteUrl.replace(/\/$/, '') + '/products.csv', { cache: 'no-store' });
+    if (!csvRes.ok) throw new Error('Unable to load the product catalogue.');
+    const text = await csvRes.text();
+    const lines = text.trim().split(/\r?\n/);
+    const products = [];
+    for (let i = 1; i < lines.length; i++) {
+      const parts = lines[i].split(',');
+      if (parts.length < 6) continue;
+      const name = clean(parts[0], 200);
+      const priceCents = Math.round(Number(parts[2]) * 100);
+      const quantity = Number.parseInt(parts[5], 10);
+      if (name && Number.isFinite(priceCents) && priceCents >= 0) {
+        products.push({ name, priceCents, quantity });
+      }
     }
+    return products;
   }
-  return products;
+}
+
+async function loadCustomCatalogue() {
+  const [productRows, optionRows] = await Promise.all([
+    fetchJson(CUSTOM_PRODUCTS_API_URL),
+    fetchJson(CUSTOM_OPTIONS_API_URL)
+  ]);
+
+  const products = productRows.map(row => ({
+    productId: clean(row.product_id, 100),
+    productName: clean(row.product_name, 160),
+    basePriceCents: Math.round(Number(row.base_price) * 100),
+    isActive: active(row.active)
+  })).filter(p => p.productId && p.productName && Number.isFinite(p.basePriceCents) && p.basePriceCents >= 0 && p.isActive);
+
+  const options = optionRows.map(row => ({
+    productId: clean(row.product_id, 100),
+    category: clean(row.category, 100),
+    option: clean(row.option, 160),
+    adjustmentCents: Math.round(Number(row.price_adjustment || 0) * 100),
+    isActive: active(row.active)
+  })).filter(o => o.productId && o.category && o.option && Number.isFinite(o.adjustmentCents) && o.isActive);
+
+  return { products, options };
+}
+
+function canonicalCustomItem(rawCustom, catalogue) {
+  const productId = clean(rawCustom?.product_id, 100);
+  const selections = rawCustom?.selections && typeof rawCustom.selections === 'object' ? rawCustom.selections : {};
+  const product = catalogue.products.find(p => p.productId === productId);
+  if (!product) throw new Error('That custom product is no longer available.');
+
+  const productOptions = catalogue.options.filter(o => o.productId === productId);
+  const categories = [...new Set(productOptions.map(o => o.category))];
+  let unitAmount = product.basePriceCents;
+  const canonicalSelections = [];
+
+  for (const category of categories) {
+    const requested = clean(selections[category], 160);
+    if (!requested) throw new Error(`Please choose an option for ${category}.`);
+    const match = productOptions.find(o => o.category === category && o.option === requested);
+    if (!match) throw new Error(`${requested} is no longer available for ${category}.`);
+    unitAmount += match.adjustmentCents;
+    canonicalSelections.push({ category, option: match.option });
+  }
+
+  if (unitAmount < 0) throw new Error('The custom product price is invalid.');
+
+  const summary = canonicalSelections.map(s => `${s.category}: ${s.option}`).join(' · ');
+  const name = product.productName + (summary ? ` — ${summary}` : '');
+  return { name, unitAmount, productId, canonicalSelections };
 }
 
 function addParam(params, key, value) {
@@ -90,35 +150,47 @@ exports.handler = async function(event) {
   try { products = await loadProducts(siteUrl); }
   catch (_) { return response(503, { error: 'We could not verify the product catalogue. Please try again.' }); }
 
+  const hasCustom = items.some(item => item && item.custom);
+  let customCatalogue = null;
+  if (hasCustom) {
+    try { customCatalogue = await loadCustomCatalogue(); }
+    catch (_) { return response(503, { error: 'We could not verify the current custom-product options. Please try again.' }); }
+  }
+
   const productMap = new Map(products.map(p => [p.name.toLowerCase(), p]));
   const validated = [];
   let merchandiseSubtotal = 0;
 
   for (const rawItem of items) {
-    const itemName = clean(rawItem.name, 200);
+    const itemName = clean(rawItem.name, 300);
     const qty = Number.parseInt(rawItem.qty, 10);
     if (!itemName || !Number.isInteger(qty) || qty < 1 || qty > 20) {
       return response(400, { error: 'One of the cart quantities is invalid.' });
     }
 
-    let unitAmount;
+    let validatedItem;
     const catalogueItem = productMap.get(itemName.toLowerCase());
-    if (catalogueItem) {
+    if (catalogueItem && !rawItem.custom) {
       if (Number.isFinite(catalogueItem.quantity) && catalogueItem.quantity >= 0 && qty > catalogueItem.quantity) {
         return response(409, { error: `${itemName} does not have enough stock for quantity ${qty}.` });
       }
-      unitAmount = catalogueItem.priceCents;
-    } else if (/^Custom .+ Candle — .+, .+$/i.test(itemName)) {
-      unitAmount = CUSTOM_CANDLE_PRICE_CENTS;
+      validatedItem = { name: catalogueItem.name, qty, unitAmount: catalogueItem.priceCents, custom: null };
+    } else if (rawItem.custom && customCatalogue) {
+      try {
+        const customItem = canonicalCustomItem(rawItem.custom, customCatalogue);
+        validatedItem = { name: customItem.name, qty, unitAmount: customItem.unitAmount, custom: customItem };
+      } catch (err) {
+        return response(400, { error: err.message || 'A custom selection could not be verified.' });
+      }
     } else {
       return response(400, { error: `We could not verify “${itemName}” in the current catalogue.` });
     }
 
-    merchandiseSubtotal += unitAmount * qty;
-    validated.push({ name: itemName, qty, unitAmount });
+    merchandiseSubtotal += validatedItem.unitAmount * qty;
+    validated.push(validatedItem);
   }
 
-  // The rule requested for Maison YoRa: $12 at $75 or below, free only above $75.
+  // Maison YoRa shipping rule: $12 at $75 or below, free only above $75.
   const shippingCents = merchandiseSubtotal > FREE_SHIPPING_THRESHOLD_CENTS ? 0 : SHIPPING_FEE_CENTS;
   const orderRef = `MY-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
@@ -143,7 +215,7 @@ exports.handler = async function(event) {
   let index = 0;
   for (const item of validated) {
     addParam(params, `line_items[${index}][price_data][currency]`, 'cad');
-    addParam(params, `line_items[${index}][price_data][product_data][name]`, item.name);
+    addParam(params, `line_items[${index}][price_data][product_data][name]`, item.name.slice(0, 250));
     addParam(params, `line_items[${index}][price_data][unit_amount]`, item.unitAmount);
     addParam(params, `line_items[${index}][quantity]`, item.qty);
     index++;
