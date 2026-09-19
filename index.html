@@ -598,6 +598,20 @@
     font-style:italic;
     line-height:1.6;
   }
+  .promo-box{
+    margin:24px 0 8px;
+    padding:18px;
+    background:var(--ivory);
+    border:1px solid var(--line);
+  }
+  .promo-row{display:grid; grid-template-columns:1fr auto; gap:10px; align-items:end;}
+  .promo-row .field{margin-bottom:0;}
+  .promo-apply{height:46px; border:none; white-space:nowrap;}
+  .promo-message{margin:10px 0 0; font-size:12.5px; line-height:1.5; color:var(--charcoal-soft);}
+  .promo-message.success{color:#496648;}
+  .promo-message.error{color:#8A3F35;}
+  .summary-line.discount{color:var(--gold-deep);}
+  @media (max-width:560px){.promo-row{grid-template-columns:1fr;} .promo-apply{width:100%;}}
 
   /* ---------- CONTACT ---------- */
   .contact{background:var(--ivory-deep); position:relative; overflow:hidden;}
@@ -1216,8 +1230,19 @@
             <label for="firstTimeCustomer" style="margin:0; text-transform:none; letter-spacing:normal; font-size:14px; color:var(--charcoal-soft);">This is my first order with Maison YoRa</label>
           </div>
 
+          <div class="promo-box">
+            <div class="promo-row">
+              <div class="field">
+                <label for="promoCode">Redeem Coupon</label>
+                <input type="text" id="promoCode" placeholder="Enter your Maison YoRa code" autocomplete="off" maxlength="64">
+              </div>
+              <button type="button" class="btn btn-outline promo-apply" id="applyPromoBtn">Apply</button>
+            </div>
+            <p class="promo-message" id="promoMessage" aria-live="polite">Review reward codes are validated securely with Stripe before checkout.</p>
+          </div>
+
           <button type="submit" class="btn btn-primary" id="checkoutPayBtn" style="width:100%; margin-top:10px; border:none;">Proceed to Secure Payment</button>
-          <p class="review-form-note">You’ll be redirected to Stripe’s secure checkout to complete payment. Maison YoRa does not store your card details. Shipping within Canada is $12 for merchandise totals of $75 CAD or less and free for merchandise totals over $75 CAD. Once shipped, you can <a href="track-order.html" style="color:var(--gold-deep);">track your order here</a>.</p>
+          <p class="review-form-note">You’ll be redirected to Stripe’s secure checkout to complete payment. Maison YoRa does not store your card details. Shipping within Canada is $12 for merchandise totals of $75 CAD or less and free for merchandise totals over $75 CAD. After payment, keep your Maison YoRa order reference. You can <a href="track-order.html" style="color:var(--gold-deep);">track your order here</a> using the order reference and checkout email.</p>
           <p class="review-form-note" id="checkoutStatus" aria-live="polite" style="display:none; color:var(--charcoal);"></p>
         </form>
 
@@ -1227,6 +1252,7 @@
             <p style="font-size:14px; color:var(--charcoal-soft);">Your cart is empty. Browse the <a href="#shop" style="color:var(--gold-deep);">shop</a> and add a candle to get started.</p>
           </div>
           <div class="summary-line" id="shippingLine" style="display:none;"><span>Shipping (Canada)</span><span id="shippingAmount">$12.00</span></div>
+          <div class="summary-line discount" id="discountLine" style="display:none;"><span id="discountLabel">Coupon</span><span id="discountAmount">-$0.00</span></div>
           <div class="summary-line total" id="totalLine" style="display:none;"><span>Total (CAD)</span><span id="totalAmount">$0.00</span></div>
           <p class="demo-note">Secure payment is processed by Stripe. Card details are entered on Stripe’s hosted checkout page and are not stored by Maison YoRa.</p>
         </div>
@@ -1244,7 +1270,7 @@
         <p class="section-sub" style="margin-bottom:34px;">Questions about a custom flower candle, an order, or a wholesale inquiry — we'd love to hear from you.</p>
         <div class="contact-info">
           <div class="item"><strong>Email</strong>maison.yora@gmail.com</div>
-          <div class="item"><strong>Phone</strong>+1 (647) 555-0148</div>
+          <div class="item"><strong>Phone</strong>+1 (647) 674-1621</div>
           <div class="item"><strong>Studio Hours</strong>Monday – Saturday, 9am – 5pm ET</div>
           <div class="item"><strong>Location</strong>Toronto, Ontario, Canada</div>
         </div>
@@ -1254,7 +1280,7 @@
         <div class="field"><label>Email</label><input type="email" id="contactEmail" placeholder="you@email.com" required></div>
         <div class="field"><label>Message</label><textarea id="contactMessage" placeholder="Tell us about your custom candle idea..." required></textarea></div>
         <button type="submit" class="btn btn-primary" style="border:none; width:100%;">Send Message</button>
-        <p class="review-form-note">Sending this opens your email app with your message ready to go straight to us at maison.yora@gmail.com. Prefer to text instead? <a href="sms:+16475550148" id="contactSmsLink" style="color:var(--gold-deep);">Message us at +1 (647) 555-0148</a>.</p>
+        <p class="review-form-note">Sending this opens your email app with your message ready to go straight to us at maison.yora@gmail.com. Prefer to text instead? <a href="sms:+16476741621" id="contactSmsLink" style="color:var(--gold-deep);">Message us at +1 (647) 674-1621</a>.</p>
       </form>
     </div>
   </section>
@@ -1277,7 +1303,7 @@
       <div class="review-promo">
         <div>
           <h3>Leave a review, get 10% off</h3>
-          <p>Share your honest experience with a rating of 4 or 5 stars and we'll send you a 10% discount code for your next order once your review is approved.</p>
+          <p>Share your honest experience and we'll send you a 10% discount code for your next order once your review is approved. The reward is for submitting an honest review, regardless of rating.</p>
         </div>
         <a href="#write-review" class="btn btn-outline">Write a Review</a>
       </div>
@@ -1412,7 +1438,7 @@
         <ul>
           <li><a href="https://www.instagram.com/maison.yora?igsh=cXVqdnNqMGFzNzUx" target="_blank" rel="noopener">Instagram</a></li>
           <li><a href="#">Pinterest</a></li>
-          <li><a href="#">Facebook</a></li>
+          <li><a href="https://www.facebook.com/share/1DMEVu2c3d/?mibextid=wwXIfr" target="_blank" rel="noopener">Facebook</a></li>
         </ul>
       </div>
     </div>
@@ -1464,11 +1490,12 @@
 <script>
 (function(){
   var BUSINESS_EMAIL = 'maison.yora@gmail.com';
-  var BUSINESS_PHONE = '+16475550148';
+  var BUSINESS_PHONE = '+16476741621';
   var SHIPPING_FEE = 12;
   var FREE_SHIPPING_THRESHOLD = 75;
 
   var cart = []; // {name, price, qty, custom?}
+  var appliedPromo = null; // {code, percent_off, amount_off, currency, discount_cents, promotion_code_id}
 
   function money(n){ return '$' + n.toFixed(2); }
 
@@ -1503,6 +1530,29 @@
 
   function shippingCost(){
     return subtotal() > FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+  }
+
+  function discountAmount(){
+    if (!appliedPromo) return 0;
+    var base = subtotal() + shippingCost();
+    if (typeof appliedPromo.percent_off === 'number' && appliedPromo.percent_off > 0){
+      return Math.min(base, Math.round((base * appliedPromo.percent_off) ) / 100);
+    }
+    if (typeof appliedPromo.amount_off === 'number' && appliedPromo.amount_off > 0){
+      return Math.min(base, appliedPromo.amount_off / 100);
+    }
+    return 0;
+  }
+
+  function clearPromo(message){
+    appliedPromo = null;
+    var input = document.getElementById('promoCode');
+    var msg = document.getElementById('promoMessage');
+    if (msg){
+      msg.className = 'promo-message';
+      msg.textContent = message || 'Review reward codes are validated securely with Stripe before checkout.';
+    }
+    if (input && !message) input.value = '';
   }
 
   function renderAll(){
@@ -1548,10 +1598,14 @@
     var totalLine = document.getElementById('totalLine');
     var totalAmount = document.getElementById('totalAmount');
     var shippingAmount = document.getElementById('shippingAmount');
+    var discountLine = document.getElementById('discountLine');
+    var discountLabel = document.getElementById('discountLabel');
+    var discountAmountEl = document.getElementById('discountAmount');
 
     if (cart.length === 0){
       linesEl.innerHTML = '<p style="font-size:14px; color:var(--charcoal-soft);">Your cart is empty. Browse the <a href="#shop" style="color:var(--gold-deep);">shop</a> and add a candle to get started.</p>';
       shippingLine.style.display = 'none';
+      discountLine.style.display = 'none';
       totalLine.style.display = 'none';
       return;
     }
@@ -1564,8 +1618,16 @@
     shippingLine.style.display = '';
     totalLine.style.display = '';
     var shipping = shippingCost();
+    var discount = discountAmount();
     shippingAmount.textContent = shipping === 0 ? 'FREE' : money(shipping);
-    totalAmount.textContent = money(subtotal() + shipping);
+    if (appliedPromo && discount > 0){
+      discountLine.style.display = '';
+      discountLabel.textContent = 'Coupon ' + appliedPromo.code;
+      discountAmountEl.textContent = '-' + money(discount);
+    } else {
+      discountLine.style.display = 'none';
+    }
+    totalAmount.textContent = money(Math.max(0, subtotal() + shipping - discount));
   }
 
   function openCart(){
@@ -2043,6 +2105,71 @@
       window.location.href = smsBase + '?&body=' + encodeURIComponent(message);
     });
 
+    // Review coupon validation -> Stripe promotion code
+    document.getElementById('applyPromoBtn').addEventListener('click', function(){
+      var codeInput = document.getElementById('promoCode');
+      var msg = document.getElementById('promoMessage');
+      var btn = document.getElementById('applyPromoBtn');
+      var code = (codeInput.value || '').trim();
+      if (!code){
+        clearPromo('Enter a coupon code first.');
+        msg.className = 'promo-message error';
+        renderOrderSummary();
+        return;
+      }
+      if (cart.length === 0){
+        clearPromo('Add an item to your order before applying a coupon.');
+        msg.className = 'promo-message error';
+        return;
+      }
+      btn.disabled = true;
+      btn.textContent = 'Checking…';
+      msg.className = 'promo-message';
+      msg.textContent = 'Validating your code securely…';
+      fetch('/.netlify/functions/validate-promo-code', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          code:code,
+          email:(document.getElementById('shipEmail').value || '').trim(),
+          subtotal_cents:Math.round((subtotal() + shippingCost()) * 100)
+        })
+      })
+      .then(function(response){
+        return response.json().then(function(data){
+          if (!response.ok || !data.valid) throw new Error(data.error || 'That coupon could not be applied.');
+          return data;
+        });
+      })
+      .then(function(data){
+        appliedPromo = data;
+        codeInput.value = data.code || code.toUpperCase();
+        msg.className = 'promo-message success';
+        msg.textContent = data.message || 'Coupon applied.';
+        renderOrderSummary();
+      })
+      .catch(function(error){
+        appliedPromo = null;
+        msg.className = 'promo-message error';
+        msg.textContent = error.message;
+        renderOrderSummary();
+      })
+      .finally(function(){
+        btn.disabled = false;
+        btn.textContent = 'Apply';
+      });
+    });
+
+    document.getElementById('promoCode').addEventListener('input', function(){
+      if (appliedPromo && this.value.trim().toUpperCase() !== appliedPromo.code.toUpperCase()) {
+        appliedPromo = null;
+        var msg = document.getElementById('promoMessage');
+        msg.className = 'promo-message';
+        msg.textContent = 'Coupon changed. Select Apply to validate the new code.';
+        renderOrderSummary();
+      }
+    });
+
     // Checkout form -> Netlify Function -> Stripe Checkout
     var checkoutForm = document.getElementById('checkoutForm');
     checkoutForm.addEventListener('submit', function(e){
@@ -2066,6 +2193,7 @@
 
       var payload = {
         items: cart.map(function(item){ return {name:item.name, qty:item.qty, custom:item.custom || null}; }),
+        promo_code: appliedPromo ? appliedPromo.code : '',
         customer: {
           name: document.getElementById('shipName').value,
           email: document.getElementById('shipEmail').value,

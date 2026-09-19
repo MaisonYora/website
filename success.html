@@ -95,6 +95,7 @@
     </div>
 
     <a class="btn" href="/">Return to Maison YoRa</a>
+    <a class="btn" id="trackOrderBtn" href="/track-order.html" style="margin-left:8px; background:transparent; color:var(--charcoal);">Track Order</a>
     <p class="status-note" id="statusNote"></p>
   </main>
 
@@ -132,6 +133,10 @@
       document.getElementById('amountPaid').textContent = typeof data.amount_total === 'number'
         ? new Intl.NumberFormat('en-CA', {style:'currency', currency:(data.currency || 'cad').toUpperCase()}).format(data.amount_total / 100)
         : '—';
+      var trackBtn = document.getElementById('trackOrderBtn');
+      if (data.order_ref && data.customer_email){
+        trackBtn.href = '/track-order.html?order_ref=' + encodeURIComponent(data.order_ref) + '&email=' + encodeURIComponent(data.customer_email);
+      }
       details.style.display = 'block';
       statusNote.textContent = paid
         ? 'Maison YoRa will prepare your order using the shipping details provided at checkout.'

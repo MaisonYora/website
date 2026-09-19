@@ -112,6 +112,54 @@ function canonicalCustomItem(rawCustom, catalogue) {
   return { name, unitAmount, productId, canonicalSelections };
 }
 
+async function loadPromotionCode(stripeKey, rawCode, subtotalCents) {
+  const code = clean(rawCode, 64);
+  if (!code) return null;
+
+  const listUrl = new URL('https://api.stripe.com/v1/promotion_codes');
+  listUrl.searchParams.set('code', code);
+  listUrl.searchParams.set('active', 'true');
+  listUrl.searchParams.set('limit', '10');
+
+  const promoRes = await fetch(listUrl, { headers: { 'Authorization': `Bearer ${stripeKey}` } });
+  const promoList = await promoRes.json();
+  if (!promoRes.ok) throw new Error(promoList?.error?.message || 'Unable to validate the coupon.');
+
+  const promo = (promoList.data || []).find(p => String(p.code || '').toLowerCase() === code.toLowerCase() && p.active);
+  if (!promo) throw new Error('That coupon code is invalid or inactive.');
+  if (promo.expires_at && promo.expires_at * 1000 < Date.now()) throw new Error('That coupon code has expired.');
+  if (promo.max_redemptions != null && promo.times_redeemed >= promo.max_redemptions) throw new Error('That coupon code has already reached its redemption limit.');
+
+  const restrictions = promo.restrictions || {};
+  if (restrictions.minimum_amount != null) {
+    const currency = String(restrictions.minimum_amount_currency || 'cad').toLowerCase();
+    if (currency !== 'cad') throw new Error('That coupon cannot be used for a CAD checkout.');
+    if (subtotalCents < restrictions.minimum_amount) {
+      const minimum = (restrictions.minimum_amount / 100).toFixed(2);
+      throw new Error(`That coupon requires an order subtotal of at least $${minimum} CAD.`);
+    }
+  }
+  if (restrictions.first_time_transaction) {
+    throw new Error('This coupon is restricted to first-time transactions and cannot be validated for this checkout flow.');
+  }
+  if (promo.customer) {
+    throw new Error('This coupon is restricted to a specific Stripe customer and cannot be used through this checkout form.');
+  }
+
+  const couponId = promo.promotion?.coupon || (typeof promo.coupon === 'string' ? promo.coupon : promo.coupon?.id);
+  if (!couponId) throw new Error('That promotion code is not linked to a valid coupon.');
+
+  const couponRes = await fetch('https://api.stripe.com/v1/coupons/' + encodeURIComponent(couponId), {
+    headers: { 'Authorization': `Bearer ${stripeKey}` }
+  });
+  const coupon = await couponRes.json();
+  if (!couponRes.ok) throw new Error(coupon?.error?.message || 'Unable to validate the coupon discount.');
+  if (!coupon.valid) throw new Error('That coupon is no longer valid.');
+  if (coupon.redeem_by && coupon.redeem_by * 1000 < Date.now()) throw new Error('That coupon has expired.');
+
+  return { promo, coupon };
+}
+
 function addParam(params, key, value) {
   if (value !== undefined && value !== null && value !== '') params.append(key, String(value));
 }
@@ -130,6 +178,7 @@ exports.handler = async function(event) {
   const items = Array.isArray(body.items) ? body.items : [];
   if (!items.length) return response(400, { error: 'Your cart is empty.' });
   if (items.length > 30) return response(400, { error: 'Too many different items in the cart.' });
+  const requestedPromoCode = clean(body.promo_code, 64);
 
   const customer = body.customer || {};
   const name = clean(customer.name, 120);
@@ -192,7 +241,14 @@ exports.handler = async function(event) {
 
   // Maison YoRa shipping rule: $12 at $75 or below, free only above $75.
   const shippingCents = merchandiseSubtotal > FREE_SHIPPING_THRESHOLD_CENTS ? 0 : SHIPPING_FEE_CENTS;
+  const checkoutSubtotalCents = merchandiseSubtotal + shippingCents;
   const orderRef = `MY-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+
+  let validatedPromo = null;
+  if (requestedPromoCode) {
+    try { validatedPromo = await loadPromotionCode(stripeKey, requestedPromoCode, checkoutSubtotalCents); }
+    catch (err) { return response(400, { error: err.message || 'That coupon could not be applied.' }); }
+  }
 
   const params = new URLSearchParams();
   addParam(params, 'mode', 'payment');
@@ -211,6 +267,22 @@ exports.handler = async function(event) {
   addParam(params, 'metadata[shipping_country]', 'CA');
   addParam(params, 'metadata[first_time_customer]', firstTime ? 'yes' : 'no');
   addParam(params, 'metadata[order_notes]', notes);
+  addParam(params, 'metadata[promo_code]', validatedPromo ? validatedPromo.promo.code : '');
+
+  // Duplicate key order fields onto the PaymentIntent so the Track Order page can
+  // securely find an order using the reference + checkout email.
+  addParam(params, 'payment_intent_data[metadata][order_ref]', orderRef);
+  addParam(params, 'payment_intent_data[metadata][customer_email]', email);
+  addParam(params, 'payment_intent_data[metadata][customer_name]', name);
+  addParam(params, 'payment_intent_data[metadata][fulfillment_status]', 'Order received');
+  addParam(params, 'payment_intent_data[metadata][shipping_city]', city);
+  addParam(params, 'payment_intent_data[metadata][shipping_province]', province);
+  addParam(params, 'payment_intent_data[metadata][shipping_postal]', postal);
+  addParam(params, 'payment_intent_data[metadata][promo_code]', validatedPromo ? validatedPromo.promo.code : '');
+
+  if (validatedPromo) {
+    addParam(params, 'discounts[0][promotion_code]', validatedPromo.promo.id);
+  }
 
   let index = 0;
   for (const item of validated) {
