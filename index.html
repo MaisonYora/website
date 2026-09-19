@@ -1293,10 +1293,10 @@
       <p class="section-sub">Real feedback from Maison YoRa customers. Every review is read by our team and approved before it appears here.</p>
 
       <div class="review-summary">
-        <div class="avg-number">4.8</div>
+        <div class="avg-number" id="reviewAverage">—</div>
         <div class="avg-meta">
           <span class="stars">★★★★★</span>
-          <span class="count">Based on 128 approved reviews</span>
+          <span class="count" id="reviewCount">Loading approved reviews…</span>
         </div>
       </div>
 
@@ -1308,100 +1308,31 @@
         <a href="#write-review" class="btn btn-outline">Write a Review</a>
       </div>
 
-      <div class="reviews-grid">
-        <div class="review-card">
-          <span class="stars">★★★★★</span>
-          <p class="review-text">The Rose Bloom candle is almost too beautiful to burn. It arrived perfectly packaged and smells incredible.</p>
-          <div class="review-who">
-            <div>
-              <div class="review-name">Sarah M.</div>
-              <div class="review-meta">Toronto, ON</div>
-            </div>
-            <span class="verified-badge">Verified Buyer</span>
-          </div>
-        </div>
-
-        <div class="review-card">
-          <span class="stars">★★★★★</span>
-          <p class="review-text">Bought the Ivory Orchid Trio as a gift and my sister was speechless. Worth every dollar for the craftsmanship alone.</p>
-          <div class="review-who">
-            <div>
-              <div class="review-name">Amanda K.</div>
-              <div class="review-meta">Ottawa, ON</div>
-            </div>
-            <span class="verified-badge">Verified Buyer</span>
-          </div>
-        </div>
-
-        <div class="review-card">
-          <span class="stars">★★★★☆</span>
-          <p class="review-text">Lovely clean scent throw and no soot on the glass. Took a little longer than expected to arrive, but well worth the wait.</p>
-          <div class="review-who">
-            <div>
-              <div class="review-name">Jason L.</div>
-              <div class="review-meta">Vancouver, BC</div>
-            </div>
-            <span class="verified-badge">Verified Buyer</span>
-          </div>
-        </div>
-
-        <div class="review-card">
-          <span class="stars">★★★★★</span>
-          <p class="review-text">You can tell this is hand-poured with care. The Amber & Sandalwood jar is now a permanent fixture on my coffee table.</p>
-          <div class="review-who">
-            <div>
-              <div class="review-name">Priya R.</div>
-              <div class="review-meta">Mississauga, ON</div>
-            </div>
-            <span class="verified-badge">Verified Buyer</span>
-          </div>
-        </div>
-
-        <div class="review-card">
-          <span class="stars">★★★★☆</span>
-          <p class="review-text">My custom Peony Cascade candle turned out even better than I imagined. Communication throughout the order was great.</p>
-          <div class="review-who">
-            <div>
-              <div class="review-name">Emily T.</div>
-              <div class="review-meta">Calgary, AB</div>
-            </div>
-            <span class="verified-badge">Verified Buyer</span>
-          </div>
-        </div>
-
-        <div class="review-card">
-          <span class="stars">★★★★★</span>
-          <p class="review-text">Everyday soy pillar candles burn evenly and cleanly. Simple, elegant, and exactly as described.</p>
-          <div class="review-who">
-            <div>
-              <div class="review-name">Marc D.</div>
-              <div class="review-meta">Toronto, ON</div>
-            </div>
-            <span class="verified-badge">Verified Buyer</span>
-          </div>
-        </div>
+      <div class="reviews-grid" id="reviewsGrid">
+        <p class="review-form-note" id="reviewsLoading">Loading approved customer reviews…</p>
       </div>
 
       <div class="review-form-wrap" id="write-review">
-        <form class="form-card">
+        <form class="form-card" id="reviewForm">
           <h3>Write a Review</h3>
           <div class="form-row">
-            <div class="field"><label>Name</label><input type="text" placeholder="Your name" required></div>
-            <div class="field"><label>Email</label><input type="email" placeholder="you@email.com" required></div>
+            <div class="field"><label for="reviewName">Name</label><input type="text" id="reviewName" placeholder="Your name" required maxlength="120"></div>
+            <div class="field"><label for="reviewEmail">Email</label><input type="email" id="reviewEmail" placeholder="you@email.com" required maxlength="180"></div>
           </div>
           <div class="field">
             <label>Your Rating</label>
             <div class="star-rating">
-              <input type="radio" id="star5" name="rating" value="5"><label for="star5">★</label>
+              <input type="radio" id="star5" name="rating" value="5" required><label for="star5">★</label>
               <input type="radio" id="star4" name="rating" value="4"><label for="star4">★</label>
               <input type="radio" id="star3" name="rating" value="3"><label for="star3">★</label>
               <input type="radio" id="star2" name="rating" value="2"><label for="star2">★</label>
               <input type="radio" id="star1" name="rating" value="1"><label for="star1">★</label>
             </div>
           </div>
-          <div class="field"><label>Your Review</label><textarea placeholder="Tell us what you thought of your candle..." required></textarea></div>
-          <button type="submit" class="btn btn-primary" style="width:100%; border:none;">Submit Review</button>
-          <p class="review-form-note">Reviews are moderated and approved by our team before publishing, typically within 1–2 business days. Approved reviews rated 4 or 5 stars automatically qualify for a 10% discount code, sent to the email address above.</p>
+          <div class="field"><label for="reviewText">Your Review</label><textarea id="reviewText" placeholder="Tell us what you thought of your Maison YoRa order..." required maxlength="1500"></textarea></div>
+          <button type="submit" class="btn btn-primary" id="reviewSubmitBtn" style="width:100%; border:none;">Submit Review</button>
+          <p class="review-form-note">Reviews are moderated before publishing, typically within 1–2 business days. One 10% review reward may be issued per email address after an approved honest review, regardless of rating. The unique code expires 30 days after approval and is intended for the same email address.</p>
+          <p class="review-form-note" id="reviewStatus" aria-live="polite" style="display:none;"></p>
         </form>
       </div>
     </div>
@@ -2170,6 +2101,126 @@
       }
     });
 
+    // Review submission -> Pending moderation -> one reward per email after approval
+    var reviewForm = document.getElementById('reviewForm');
+    if (reviewForm){
+      reviewForm.addEventListener('submit', function(e){
+        e.preventDefault();
+        if (!reviewForm.checkValidity()){
+          reviewForm.reportValidity();
+          return;
+        }
+        var ratingEl = reviewForm.querySelector('input[name="rating"]:checked');
+        if (!ratingEl){
+          var rs0 = document.getElementById('reviewStatus');
+          rs0.style.display = 'block';
+          rs0.style.color = '#8A3F35';
+          rs0.textContent = 'Please choose a star rating.';
+          return;
+        }
+        var btn = document.getElementById('reviewSubmitBtn');
+        var status = document.getElementById('reviewStatus');
+        btn.disabled = true;
+        btn.textContent = 'Submitting…';
+        status.style.display = 'block';
+        status.style.color = 'var(--charcoal-soft)';
+        status.textContent = 'Sending your review for moderation…';
+
+        fetch('/.netlify/functions/submit-review', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({
+            name:document.getElementById('reviewName').value,
+            email:document.getElementById('reviewEmail').value,
+            rating:Number(ratingEl.value),
+            review:document.getElementById('reviewText').value
+          })
+        })
+        .then(function(response){
+          return response.json().then(function(data){
+            if (!response.ok) throw new Error(data.error || 'Unable to submit your review.');
+            return data;
+          });
+        })
+        .then(function(data){
+          status.style.color = '#496648';
+          status.textContent = data.message || 'Thank you. Your review is pending moderation.';
+          reviewForm.reset();
+        })
+        .catch(function(error){
+          status.style.color = '#8A3F35';
+          status.textContent = error.message;
+        })
+        .finally(function(){
+          btn.disabled = false;
+          btn.textContent = 'Submit Review';
+        });
+      });
+    }
+
+    function loadApprovedReviews(){
+      var grid = document.getElementById('reviewsGrid');
+      var avg = document.getElementById('reviewAverage');
+      var count = document.getElementById('reviewCount');
+      if (!grid || !avg || !count) return;
+      fetch('/.netlify/functions/reviews-feed', {cache:'no-store'})
+        .then(function(response){
+          return response.json().then(function(data){
+            if (!response.ok) throw new Error(data.error || 'Unable to load reviews.');
+            return data;
+          });
+        })
+        .then(function(data){
+          var reviews = Array.isArray(data.reviews) ? data.reviews : [];
+          grid.innerHTML = '';
+          if (!reviews.length){
+            var empty = document.createElement('p');
+            empty.className = 'review-form-note';
+            empty.textContent = 'No approved reviews have been published yet.';
+            grid.appendChild(empty);
+            avg.textContent = '—';
+            count.textContent = 'No approved reviews yet';
+            return;
+          }
+          var sum = 0;
+          reviews.forEach(function(r){
+            var rating = Math.max(1, Math.min(5, Number(r.rating) || 0));
+            sum += rating;
+            var card = document.createElement('div');
+            card.className = 'review-card';
+            var stars = document.createElement('span');
+            stars.className = 'stars';
+            stars.textContent = '★★★★★'.slice(0, rating) + '☆☆☆☆☆'.slice(0, 5-rating);
+            var text = document.createElement('p');
+            text.className = 'review-text';
+            text.textContent = r.review || '';
+            var who = document.createElement('div');
+            who.className = 'review-who';
+            var left = document.createElement('div');
+            var name = document.createElement('div');
+            name.className = 'review-name';
+            name.textContent = r.name || 'Maison YoRa customer';
+            var meta = document.createElement('div');
+            meta.className = 'review-meta';
+            meta.textContent = r.review_date || '';
+            left.appendChild(name); left.appendChild(meta);
+            var badge = document.createElement('span');
+            badge.className = 'verified-badge';
+            badge.textContent = 'Approved Review';
+            who.appendChild(left); who.appendChild(badge);
+            card.appendChild(stars); card.appendChild(text); card.appendChild(who);
+            grid.appendChild(card);
+          });
+          avg.textContent = (sum / reviews.length).toFixed(1);
+          count.textContent = 'Based on ' + reviews.length + ' approved review' + (reviews.length === 1 ? '' : 's');
+        })
+        .catch(function(){
+          grid.innerHTML = '<p class="review-form-note">Approved reviews are temporarily unavailable.</p>';
+          avg.textContent = '—';
+          count.textContent = 'Reviews temporarily unavailable';
+        });
+    }
+
     // Checkout form -> Netlify Function -> Stripe Checkout
     var checkoutForm = document.getElementById('checkoutForm');
     checkoutForm.addEventListener('submit', function(e){
@@ -2235,6 +2286,7 @@
       refreshImages();
     });
     loadCustomConfigurator();
+    loadApprovedReviews();
     refreshImages(); // covers hero/about/gallery images, which don't depend on products.csv
   });
 })();

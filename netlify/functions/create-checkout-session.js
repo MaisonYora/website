@@ -112,7 +112,7 @@ function canonicalCustomItem(rawCustom, catalogue) {
   return { name, unitAmount, productId, canonicalSelections };
 }
 
-async function loadPromotionCode(stripeKey, rawCode, subtotalCents) {
+async function loadPromotionCode(stripeKey, rawCode, subtotalCents, checkoutEmail) {
   const code = clean(rawCode, 64);
   if (!code) return null;
 
@@ -129,6 +129,13 @@ async function loadPromotionCode(stripeKey, rawCode, subtotalCents) {
   if (!promo) throw new Error('That coupon code is invalid or inactive.');
   if (promo.expires_at && promo.expires_at * 1000 < Date.now()) throw new Error('That coupon code has expired.');
   if (promo.max_redemptions != null && promo.times_redeemed >= promo.max_redemptions) throw new Error('That coupon code has already reached its redemption limit.');
+
+  const meta = promo.metadata || {};
+  if (String(meta.reward_type || '').toLowerCase() === 'review') {
+    const rewardEmail = clean(meta.review_email, 180).toLowerCase();
+    const normalizedCheckoutEmail = clean(checkoutEmail, 180).toLowerCase();
+    if (rewardEmail && rewardEmail !== normalizedCheckoutEmail) throw new Error('This review reward is linked to a different email address.');
+  }
 
   const restrictions = promo.restrictions || {};
   if (restrictions.minimum_amount != null) {
@@ -246,7 +253,7 @@ exports.handler = async function(event) {
 
   let validatedPromo = null;
   if (requestedPromoCode) {
-    try { validatedPromo = await loadPromotionCode(stripeKey, requestedPromoCode, checkoutSubtotalCents); }
+    try { validatedPromo = await loadPromotionCode(stripeKey, requestedPromoCode, checkoutSubtotalCents, email); }
     catch (err) { return response(400, { error: err.message || 'That coupon could not be applied.' }); }
   }
 

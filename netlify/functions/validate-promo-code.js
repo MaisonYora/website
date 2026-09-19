@@ -27,6 +27,7 @@ exports.handler = async function(event) {
   catch (_) { return response(400, { valid: false, error: 'Invalid coupon request.' }); }
 
   const code = clean(body.code, 64);
+  const email = clean(body.email, 180).toLowerCase();
   const subtotalCents = Math.max(0, Number.parseInt(body.subtotal_cents, 10) || 0);
   if (!code) return response(400, { valid: false, error: 'Enter a coupon code.' });
 
@@ -40,6 +41,13 @@ exports.handler = async function(event) {
     if (!promo) return response(400, { valid: false, error: 'That coupon code is invalid or inactive.' });
     if (promo.expires_at && promo.expires_at * 1000 < Date.now()) return response(400, { valid: false, error: 'That coupon code has expired.' });
     if (promo.max_redemptions != null && promo.times_redeemed >= promo.max_redemptions) return response(400, { valid: false, error: 'That coupon code has already been used.' });
+
+    const meta = promo.metadata || {};
+    if (String(meta.reward_type || '').toLowerCase() === 'review') {
+      const rewardEmail = clean(meta.review_email, 180).toLowerCase();
+      if (!email) return response(400, { valid: false, error: 'Enter the email address that received this review reward before applying the code.' });
+      if (rewardEmail && rewardEmail !== email) return response(400, { valid: false, error: 'This review reward is linked to a different email address.' });
+    }
 
     const restrictions = promo.restrictions || {};
     if (restrictions.minimum_amount != null) {
