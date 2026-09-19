@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order Confirmed — Maison YoRa</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ivory:#FBF7EF;
+    --ivory-deep:#F1E7D4;
+    --charcoal:#2B2620;
+    --charcoal-soft:#5A5348;
+    --gold:#A9803F;
+    --gold-deep:#8C6B34;
+    --line:#E3D6BC;
+    --white:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    display:grid;
+    place-items:center;
+    padding:32px 20px;
+    background:var(--ivory);
+    color:var(--charcoal);
+    font-family:'Jost',sans-serif;
+    font-weight:300;
+  }
+  .card{
+    width:min(680px,100%);
+    background:var(--white);
+    border:1px solid var(--line);
+    padding:clamp(32px,7vw,64px);
+    text-align:center;
+    box-shadow:0 18px 50px rgba(43,38,32,.08);
+  }
+  .eyebrow{
+    display:block;
+    margin-bottom:18px;
+    color:var(--gold-deep);
+    text-transform:uppercase;
+    letter-spacing:.22em;
+    font-size:12px;
+    font-weight:600;
+  }
+  h1{
+    margin:0 0 18px;
+    font-family:'Cormorant Garamond',serif;
+    font-size:clamp(38px,7vw,58px);
+    font-weight:500;
+    line-height:1.05;
+  }
+  p{color:var(--charcoal-soft); line-height:1.7; margin:0 auto 18px; max-width:540px;}
+  .details{
+    margin:30px auto;
+    padding:22px 0;
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    text-align:left;
+    max-width:460px;
+  }
+  .row{display:flex; justify-content:space-between; gap:24px; padding:7px 0; font-size:14px;}
+  .row span:first-child{color:var(--charcoal-soft);}
+  .row span:last-child{text-align:right; font-weight:500;}
+  .btn{
+    display:inline-block;
+    padding:13px 24px;
+    background:var(--charcoal);
+    border:1px solid var(--charcoal);
+    color:var(--ivory);
+    text-decoration:none;
+    text-transform:uppercase;
+    letter-spacing:.12em;
+    font-size:12px;
+    font-weight:500;
+  }
+  .btn:hover{background:var(--gold-deep); border-color:var(--gold-deep);}
+  .status-note{font-size:13px; margin-top:20px;}
+</style>
+</head>
+<body>
+  <main class="card">
+    <span class="eyebrow">Maison YoRa</span>
+    <h1 id="title">Confirming your payment…</h1>
+    <p id="message">Please wait while we securely verify your order.</p>
+
+    <div class="details" id="details" style="display:none;">
+      <div class="row"><span>Order reference</span><span id="orderRef">—</span></div>
+      <div class="row"><span>Email</span><span id="customerEmail">—</span></div>
+      <div class="row"><span>Total paid</span><span id="amountPaid">—</span></div>
+    </div>
+
+    <a class="btn" href="/">Return to Maison YoRa</a>
+    <p class="status-note" id="statusNote"></p>
+  </main>
+
+<script>
+(function(){
+  var params = new URLSearchParams(window.location.search);
+  var sessionId = params.get('session_id');
+  var title = document.getElementById('title');
+  var message = document.getElementById('message');
+  var details = document.getElementById('details');
+  var statusNote = document.getElementById('statusNote');
+
+  if (!sessionId){
+    title.textContent = 'Order confirmation';
+    message.textContent = 'We could not find a payment session on this page. If you completed a payment, please check your email receipt or contact Maison YoRa.';
+    return;
+  }
+
+  fetch('/.netlify/functions/checkout-session?session_id=' + encodeURIComponent(sessionId), {cache:'no-store'})
+    .then(function(response){
+      return response.json().then(function(data){
+        if (!response.ok) throw new Error(data.error || 'Unable to verify payment.');
+        return data;
+      });
+    })
+    .then(function(data){
+      var paid = data.payment_status === 'paid';
+      title.textContent = paid ? 'Thank you for your order' : 'Payment is processing';
+      message.textContent = paid
+        ? 'Your payment has been confirmed. A receipt will be sent to your email address.'
+        : 'Stripe is still processing your payment. You can safely close this page; your receipt will arrive by email when payment is confirmed.';
+
+      document.getElementById('orderRef').textContent = data.order_ref || data.id || '—';
+      document.getElementById('customerEmail').textContent = data.customer_email || '—';
+      document.getElementById('amountPaid').textContent = typeof data.amount_total === 'number'
+        ? new Intl.NumberFormat('en-CA', {style:'currency', currency:(data.currency || 'cad').toUpperCase()}).format(data.amount_total / 100)
+        : '—';
+      details.style.display = 'block';
+      statusNote.textContent = paid
+        ? 'Maison YoRa will prepare your order using the shipping details provided at checkout.'
+        : 'If you do not receive confirmation, contact Maison YoRa before submitting another payment.';
+    })
+    .catch(function(error){
+      title.textContent = 'We received your return from checkout';
+      message.textContent = 'We could not verify the payment status on this page. Please check your Stripe receipt email before trying to pay again.';
+      statusNote.textContent = error.message;
+    });
+})();
+</script>
+</body>
+</html>

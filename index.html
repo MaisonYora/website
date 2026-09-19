@@ -1142,8 +1142,9 @@
             <label for="firstTimeCustomer" style="margin:0; text-transform:none; letter-spacing:normal; font-size:14px; color:var(--charcoal-soft);">This is my first order with Maison YoRa</label>
           </div>
 
-          <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px; border:none;">Place Order</button>
-          <p class="review-form-note">Placing your order opens your email app with your cart and shipping details ready to send straight to us at maison.yora@gmail.com. Prefer to text instead? <a href="#" id="orderSmsLink" style="color:var(--gold-deep);">Message us at +1 (647) 555-0148</a>. For your security, we do not collect payment details through this form — we'll follow up to confirm your order and arrange secure payment (e-transfer or invoice). Once shipped, you can <a href="track-order.html" style="color:var(--gold-deep);">track your order here</a>.</p>
+          <button type="submit" class="btn btn-primary" id="checkoutPayBtn" style="width:100%; margin-top:10px; border:none;">Proceed to Secure Payment</button>
+          <p class="review-form-note">You’ll be redirected to Stripe’s secure checkout to complete payment. Maison YoRa does not store your card details. Shipping within Canada is $12 for merchandise totals of $75 CAD or less and free for merchandise totals over $75 CAD. Once shipped, you can <a href="track-order.html" style="color:var(--gold-deep);">track your order here</a>.</p>
+          <p class="review-form-note" id="checkoutStatus" aria-live="polite" style="display:none; color:var(--charcoal);"></p>
         </form>
 
         <div class="order-summary">
@@ -1151,9 +1152,9 @@
           <div id="orderSummaryLines">
             <p style="font-size:14px; color:var(--charcoal-soft);">Your cart is empty. Browse the <a href="#shop" style="color:var(--gold-deep);">shop</a> and add a candle to get started.</p>
           </div>
-          <div class="summary-line" id="shippingLine" style="display:none;"><span>Shipping (Canada)</span><span>$12.00</span></div>
+          <div class="summary-line" id="shippingLine" style="display:none;"><span>Shipping (Canada)</span><span id="shippingAmount">$12.00</span></div>
           <div class="summary-line total" id="totalLine" style="display:none;"><span>Total (CAD)</span><span id="totalAmount">$0.00</span></div>
-          <p class="demo-note">This site is a front-end demonstration. Submitting the form does not charge any payment or store your data on a server — it opens your own email app with the order details pre-filled for you to send to us directly.</p>
+          <p class="demo-note">Secure payment is processed by Stripe. Card details are entered on Stripe’s hosted checkout page and are not stored by Maison YoRa.</p>
         </div>
       </div>
     </div>
@@ -1391,6 +1392,7 @@
   var BUSINESS_EMAIL = 'maison.yora@gmail.com';
   var BUSINESS_PHONE = '+16475550148';
   var SHIPPING_FEE = 12;
+  var FREE_SHIPPING_THRESHOLD = 75;
 
   var cart = []; // {name, price, qty}
 
@@ -1423,6 +1425,10 @@
 
   function subtotal(){
     return cart.reduce(function(sum, i){ return sum + (i.price * i.qty); }, 0);
+  }
+
+  function shippingCost(){
+    return subtotal() > FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
   }
 
   function renderAll(){
@@ -1467,6 +1473,7 @@
     var shippingLine = document.getElementById('shippingLine');
     var totalLine = document.getElementById('totalLine');
     var totalAmount = document.getElementById('totalAmount');
+    var shippingAmount = document.getElementById('shippingAmount');
 
     if (cart.length === 0){
       linesEl.innerHTML = '<p style="font-size:14px; color:var(--charcoal-soft);">Your cart is empty. Browse the <a href="#shop" style="color:var(--gold-deep);">shop</a> and add a candle to get started.</p>';
@@ -1482,7 +1489,9 @@
     linesEl.innerHTML = html;
     shippingLine.style.display = '';
     totalLine.style.display = '';
-    totalAmount.textContent = money(subtotal() + SHIPPING_FEE);
+    var shipping = shippingCost();
+    shippingAmount.textContent = shipping === 0 ? 'FREE' : money(shipping);
+    totalAmount.textContent = money(subtotal() + shipping);
   }
 
   function openCart(){
@@ -1492,48 +1501,6 @@
   function closeCart(){
     document.getElementById('cartPanel').classList.remove('open');
     document.getElementById('cartOverlay').classList.remove('open');
-  }
-
-  function buildOrderMessage(){
-    var name = document.getElementById('shipName').value;
-    var email = document.getElementById('shipEmail').value;
-    var addr1 = document.getElementById('shipAddress1').value;
-    var addr2 = document.getElementById('shipAddress2').value;
-    var city = document.getElementById('shipCity').value;
-    var province = document.getElementById('shipProvince').value;
-    var postal = document.getElementById('shipPostal').value;
-    var notes = document.getElementById('shipNotes').value;
-    var isFirstTime = document.getElementById('firstTimeCustomer').checked;
-
-    var lines = [];
-    lines.push('New order from the Maison YoRa website');
-    lines.push('');
-    lines.push('Name: ' + name);
-    lines.push('Email: ' + email);
-    lines.push('Shipping Address:');
-    lines.push(addr1 + (addr2 ? ', ' + addr2 : ''));
-    lines.push(city + ', ' + province + ' ' + postal);
-    lines.push('Canada');
-    lines.push('');
-    lines.push('Customer says this is their first order: ' + (isFirstTime ? 'YES' : 'No / not specified'));
-    lines.push('');
-    lines.push('Order:');
-    if (cart.length === 0){
-      lines.push('(no items added — please add candles from the shop before ordering)');
-    } else {
-      cart.forEach(function(item){
-        lines.push('- ' + item.name + ' x' + item.qty + ' — ' + money(item.price * item.qty));
-      });
-      lines.push('Shipping: ' + money(SHIPPING_FEE));
-      lines.push('Total: ' + money(subtotal() + SHIPPING_FEE) + ' CAD');
-    }
-    if (notes){
-      lines.push('');
-      lines.push('Order notes: ' + notes);
-    }
-    lines.push('');
-    lines.push('(Payment to be arranged directly with the customer after order confirmation.)');
-    return lines.join('\n');
   }
 
   function refreshImages(){
@@ -1817,7 +1784,7 @@
       window.location.href = smsBase + '?&body=' + encodeURIComponent(message);
     });
 
-    // Checkout form -> opens email app, pre-filled with order + shipping details
+    // Checkout form -> Netlify Function -> Stripe Checkout
     var checkoutForm = document.getElementById('checkoutForm');
     checkoutForm.addEventListener('submit', function(e){
       e.preventDefault();
@@ -1825,16 +1792,55 @@
         checkoutForm.reportValidity();
         return;
       }
-      var subject = 'New Order - Maison YoRa';
-      var body = buildOrderMessage();
-      var mailto = 'mailto:' + BUSINESS_EMAIL + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-      window.location.href = mailto;
-    });
+      if (cart.length === 0){
+        openCart();
+        return;
+      }
 
-    document.getElementById('orderSmsLink').addEventListener('click', function(e){
-      e.preventDefault();
-      var body = buildOrderMessage();
-      window.location.href = smsBase + '?&body=' + encodeURIComponent(body);
+      var payBtn = document.getElementById('checkoutPayBtn');
+      var statusEl = document.getElementById('checkoutStatus');
+      var originalText = payBtn.textContent;
+      payBtn.disabled = true;
+      payBtn.textContent = 'Opening Secure Checkout…';
+      statusEl.style.display = 'none';
+      statusEl.textContent = '';
+
+      var payload = {
+        items: cart.map(function(item){ return {name:item.name, qty:item.qty}; }),
+        customer: {
+          name: document.getElementById('shipName').value,
+          email: document.getElementById('shipEmail').value,
+          address1: document.getElementById('shipAddress1').value,
+          address2: document.getElementById('shipAddress2').value,
+          city: document.getElementById('shipCity').value,
+          province: document.getElementById('shipProvince').value,
+          postal: document.getElementById('shipPostal').value,
+          notes: document.getElementById('shipNotes').value,
+          firstTime: document.getElementById('firstTimeCustomer').checked
+        }
+      };
+
+      fetch('/.netlify/functions/create-checkout-session', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      })
+        .then(function(response){
+          return response.json().then(function(data){
+            if (!response.ok) throw new Error(data.error || 'Unable to start secure checkout.');
+            return data;
+          });
+        })
+        .then(function(data){
+          if (!data.url) throw new Error('Stripe did not return a checkout link.');
+          window.location.href = data.url;
+        })
+        .catch(function(error){
+          statusEl.textContent = error.message + ' Please try again or contact Maison YoRa if the issue continues.';
+          statusEl.style.display = 'block';
+          payBtn.disabled = false;
+          payBtn.textContent = originalText;
+        });
     });
 
     renderAll();
