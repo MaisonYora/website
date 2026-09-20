@@ -1242,7 +1242,7 @@
           </div>
 
           <button type="submit" class="btn btn-primary" id="checkoutPayBtn" style="width:100%; margin-top:10px; border:none;">Proceed to Secure Payment</button>
-          <p class="review-form-note">You’ll be redirected to Stripe’s secure checkout to complete payment. Maison YoRa does not store your card details. Shipping within Canada is $12 for merchandise totals of $75 CAD or less and free for merchandise totals over $75 CAD. After payment, keep your Maison YoRa order reference. You can <a href="track-order.html" style="color:var(--gold-deep);">track your order here</a> using the order reference and checkout email.</p>
+          <p class="review-form-note">You’ll be redirected to Stripe’s secure checkout to complete payment. Maison YoRa does not store your card details. Shipping within Canada is $8 for merchandise totals of $75 CAD or less and free for merchandise totals over $75 CAD. After payment, keep your Maison YoRa order reference. You can <a href="track-order.html" style="color:var(--gold-deep);">track your order here</a> using the order reference and checkout email.</p>
           <p class="review-form-note" id="checkoutStatus" aria-live="polite" style="display:none; color:var(--charcoal);"></p>
         </form>
 
@@ -1251,7 +1251,7 @@
           <div id="orderSummaryLines">
             <p style="font-size:14px; color:var(--charcoal-soft);">Your cart is empty. Browse the <a href="#shop" style="color:var(--gold-deep);">shop</a> and add a candle to get started.</p>
           </div>
-          <div class="summary-line" id="shippingLine" style="display:none;"><span>Shipping (Canada)</span><span id="shippingAmount">$12.00</span></div>
+          <div class="summary-line" id="shippingLine" style="display:none;"><span>Shipping (Canada)</span><span id="shippingAmount">$8.00</span></div>
           <div class="summary-line discount" id="discountLine" style="display:none;"><span id="discountLabel">Coupon</span><span id="discountAmount">-$0.00</span></div>
           <div class="summary-line total" id="totalLine" style="display:none;"><span>Total (CAD)</span><span id="totalAmount">$0.00</span></div>
           <p class="demo-note">Secure payment is processed by Stripe. Card details are entered on Stripe’s hosted checkout page and are not stored by Maison YoRa.</p>
@@ -1434,7 +1434,7 @@ window.addEventListener('pageshow', function () {
 (function(){
   var BUSINESS_EMAIL = 'maison.yora@gmail.com';
   var BUSINESS_PHONE = '+16476741621';
-  var SHIPPING_FEE = 12;
+  var SHIPPING_FEE = 8;
   var FREE_SHIPPING_THRESHOLD = 75;
 
   var cart = []; // {name, price, qty, custom?}

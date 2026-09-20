@@ -2,7 +2,7 @@ const SHEET_ID = '1YQRL0Qx3x5G9IqFR2CthlT-4tiaYMDoEBlRFbeHOSBg';
 const PRODUCTS_API_URL = `https://opensheet.elk.sh/${SHEET_ID}/1`;
 const CUSTOM_PRODUCTS_API_URL = `https://opensheet.elk.sh/${SHEET_ID}/CustomProducts`;
 const CUSTOM_OPTIONS_API_URL = `https://opensheet.elk.sh/${SHEET_ID}/CustomOptions`;
-const SHIPPING_FEE_CENTS = 1200;
+const SHIPPING_FEE_CENTS = 800;
 const FREE_SHIPPING_THRESHOLD_CENTS = 7500; // Free only when merchandise subtotal is OVER $75.
 
 function response(statusCode, body) {
@@ -246,7 +246,7 @@ exports.handler = async function(event) {
     validated.push(validatedItem);
   }
 
-  // Maison YoRa shipping rule: $12 at $75 or below, free only above $75.
+  // Maison YoRa shipping rule: $8 at $75 or below, free only above $75.
   const shippingCents = merchandiseSubtotal > FREE_SHIPPING_THRESHOLD_CENTS ? 0 : SHIPPING_FEE_CENTS;
   const checkoutSubtotalCents = merchandiseSubtotal + shippingCents;
   const orderRef = `MY-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
