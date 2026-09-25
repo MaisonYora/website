@@ -1639,7 +1639,7 @@ window.addEventListener('pageshow', function () {
               quantity: parseInt(row.quantity, 10)
             };
           }).filter(function(p){ return p.name; });
-          renderProducts(products);
+          renderProducts(renamePrimaryProductImages(products));
         })
         .catch(function(err){
           console.log('Could not load products from Google Sheet, falling back to local file:', err.message);
@@ -1672,7 +1672,7 @@ window.addEventListener('pageshow', function () {
             quantity: parseInt(parts[5].trim(), 10)
           });
         }
-        renderProducts(products);
+        renderProducts(renamePrimaryProductImages(products));
       })
       .catch(function(err){
         var grid = document.getElementById('productsGrid');
@@ -1856,6 +1856,17 @@ window.addEventListener('pageshow', function () {
     var div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
+  }
+
+  function renamePrimaryProductImages(products){
+    var nextImageNumber = 1;
+    products.forEach(function(product){
+      if (nextImageNumber <= 2 && /^product-/i.test(String(product.image || '').trim())){
+        product.image = 'Candle-Image' + nextImageNumber;
+        nextImageNumber += 1;
+      }
+    });
+    return products;
   }
 
   function renderProducts(products){
