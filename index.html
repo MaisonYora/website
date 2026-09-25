@@ -457,6 +457,15 @@
   .product-img{aspect-ratio:4/5; overflow:hidden;}
   .product-img img{width:100%; height:100%; object-fit:cover; transition:transform .5s ease;}
   .product-card:hover .product-img img{transform:scale(1.05);}
+  .product-card.three-face-card .product-img{display:flex; align-items:center; justify-content:center;}
+  .product-card.three-face-card .product-img img{width:82%; height:82%; object-fit:contain;}
+  .product-card.three-face-card:hover .product-img img{transform:scale(1.03);}
+  .product-card.three-face-card .product-body h3{font-size:18px;}
+  .product-card.three-face-card .product-body .desc{font-size:13px;}
+  .product-card.three-face-card .price{font-size:19px;}
+  .product-card.three-face-card .delivery-note,
+  .product-card.three-face-card .stock-note{font-size:11px;}
+  .product-card.three-face-card .add-btn{font-size:11px;}
   .product-body{padding:26px 24px 28px; display:flex; flex-direction:column; gap:10px; flex:1;}
   .product-body h3{font-size:21px;}
   .product-body .desc{font-size:14.5px; color:var(--charcoal-soft); flex:1;}
@@ -1892,12 +1901,13 @@ window.addEventListener('pageshow', function () {
 
       var deliveryText = isCustom ? 'Made to order — up to 7 days' : '3–7 business days';
       var safeName = escapeHtml(p.name);
+      var isThreeFace = /three[\s-]*face/i.test(String(p.name || ''));
 
       var stockNoteHtml = lowStock ? '<span class="stock-note show">Only ' + qty + ' left in stock</span>' : '';
       var btnDisabled = soldOut ? ' disabled' : '';
       var btnLabel = soldOut ? 'Sold Out' : 'Add to Order';
 
-      html += '<div class="product-card' + (soldOut ? ' sold-out' : '') + '">' +
+      html += '<div class="product-card' + (soldOut ? ' sold-out' : '') + (isThreeFace ? ' three-face-card' : '') + '">' +
         '<div class="product-img"><img data-img="' + escapeHtml(p.image) + '" alt="' + safeName + '"></div>' +
         '<div class="product-body">' +
           '<h3>' + safeName + '</h3>' +
