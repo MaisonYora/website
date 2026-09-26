@@ -1592,27 +1592,45 @@ window.addEventListener('pageshow', function () {
   }
 
   function refreshImages(){
-    // For each [data-img="name"] element, tries images/name.jpg, .jpeg, .png, .webp
-    // (in that order) and uses whichever one actually exists — so you can upload
-    // "hero" as any of these formats and the site just finds it. Also cache-busts
-    // so a replaced photo always shows up right away instead of a stale cached copy.
+    // Robust image loader: supports files in /images or site root, with or without
+    // an extension in the sheet, and handles upper/lower-case extensions on Netlify.
     var extensions = ['jpg', 'jpeg', 'png', 'webp', 'JPG', 'JPEG', 'PNG', 'WEBP'];
     var version = Date.now();
 
-    function tryLoad(el, name, i){
-      if (i >= extensions.length){
-        console.log('No image file found for "' + name + '" (tried: ' + extensions.join(', ') + ')');
+    function buildCandidates(name){
+      var clean = String(name || '').trim().replace(/^\.\//, '');
+      var candidates = [];
+      if (!clean) return candidates;
+
+      // If the sheet already includes an extension, try that exact filename first.
+      if (/\.(jpe?g|png|webp)$/i.test(clean)){
+        candidates.push('images/' + clean);
+        candidates.push(clean);
+      } else {
+        extensions.forEach(function(ext){
+          candidates.push('images/' + clean + '.' + ext);
+        });
+        extensions.forEach(function(ext){
+          candidates.push(clean + '.' + ext);
+        });
+      }
+      return candidates;
+    }
+
+    function tryCandidates(el, candidates, i){
+      if (i >= candidates.length){
+        console.log('No image file found for "' + el.getAttribute('data-img') + '". Tried:', candidates);
         return;
       }
-      var candidate = 'images/' + name + '.' + extensions[i] + '?v=' + version;
+      var candidate = candidates[i] + '?v=' + version;
       var test = new Image();
       test.onload = function(){ el.src = candidate; };
-      test.onerror = function(){ tryLoad(el, name, i + 1); };
+      test.onerror = function(){ tryCandidates(el, candidates, i + 1); };
       test.src = candidate;
     }
 
     document.querySelectorAll('[data-img]').forEach(function(el){
-      tryLoad(el, el.getAttribute('data-img'), 0);
+      tryCandidates(el, buildCandidates(el.getAttribute('data-img')), 0);
     });
   }
 
@@ -1638,13 +1656,20 @@ window.addEventListener('pageshow', function () {
           return res.json();
         })
         .then(function(rows){
-          var products = rows.map(function(row){
+          var products = rows.map(function(row, index){
+            var sheetImage = String(row.image || '').trim();
+            // New standard product image names. If an older product-* name is still
+            // in the sheet (or the image cell is blank), use Candle-Image1, 2, 3...
+            var productImage = sheetImage;
+            if (!productImage || /^product-/i.test(productImage)){
+              productImage = 'Candle-Image' + (index + 1);
+            }
             return {
               name: String(row.name || '').trim(),
               description: String(row.description || '').trim(),
               price: parseFloat(row.price),
               type: String(row.type || '').trim().toLowerCase(),
-              image: String(row.image || '').trim(),
+              image: productImage,
               quantity: parseInt(row.quantity, 10)
             };
           }).filter(function(p){ return p.name; });
@@ -1672,12 +1697,16 @@ window.addEventListener('pageshow', function () {
           if (!line) continue;
           var parts = line.split(',');
           if (parts.length < 6) continue;
+          var csvImage = parts[4].trim();
+          if (!csvImage || /^product-/i.test(csvImage)){
+            csvImage = 'Candle-Image' + (products.length + 1);
+          }
           products.push({
             name: parts[0].trim(),
             description: parts[1].trim(),
             price: parseFloat(parts[2]),
             type: parts[3].trim().toLowerCase(),
-            image: parts[4].trim(),
+            image: csvImage,
             quantity: parseInt(parts[5].trim(), 10)
           });
         }
