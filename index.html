@@ -1656,24 +1656,19 @@ window.addEventListener('pageshow', function () {
           return res.json();
         })
         .then(function(rows){
-          var products = rows.map(function(row, index){
-            var sheetImage = String(row.image || '').trim();
-            // New standard product image names. If an older product-* name is still
-            // in the sheet (or the image cell is blank), use Candle-Image1, 2, 3...
-            var productImage = sheetImage;
-            if (!productImage || /^product-/i.test(productImage)){
-              productImage = 'Candle-Image' + (index + 1);
-            }
+          var products = rows.map(function(row){
             return {
               name: String(row.name || '').trim(),
               description: String(row.description || '').trim(),
               price: parseFloat(row.price),
               type: String(row.type || '').trim().toLowerCase(),
-              image: productImage,
+              // Use the image value from the Google Sheet exactly as entered.
+              // Example: Candle-Image1 or Candle-Image1.JPG
+              image: String(row.image || '').trim(),
               quantity: parseInt(row.quantity, 10)
             };
           }).filter(function(p){ return p.name; });
-          renderProducts(renamePrimaryProductImages(products));
+          renderProducts(products);
         })
         .catch(function(err){
           console.log('Could not load products from Google Sheet, falling back to local file:', err.message);
@@ -1697,20 +1692,16 @@ window.addEventListener('pageshow', function () {
           if (!line) continue;
           var parts = line.split(',');
           if (parts.length < 6) continue;
-          var csvImage = parts[4].trim();
-          if (!csvImage || /^product-/i.test(csvImage)){
-            csvImage = 'Candle-Image' + (products.length + 1);
-          }
           products.push({
             name: parts[0].trim(),
             description: parts[1].trim(),
             price: parseFloat(parts[2]),
             type: parts[3].trim().toLowerCase(),
-            image: csvImage,
+            image: parts[4].trim(),
             quantity: parseInt(parts[5].trim(), 10)
           });
         }
-        renderProducts(renamePrimaryProductImages(products));
+        renderProducts(products);
       })
       .catch(function(err){
         var grid = document.getElementById('productsGrid');
@@ -1894,17 +1885,6 @@ window.addEventListener('pageshow', function () {
     var div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
-  }
-
-  function renamePrimaryProductImages(products){
-    var nextImageNumber = 1;
-    products.forEach(function(product){
-      if (nextImageNumber <= 2 && /^product-/i.test(String(product.image || '').trim())){
-        product.image = 'Candle-Image' + nextImageNumber;
-        nextImageNumber += 1;
-      }
-    });
-    return products;
   }
 
   function renderProducts(products){
